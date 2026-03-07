@@ -1,0 +1,314 @@
+.about {
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #FAFBFD, #E8F9FB);
+  font-family: "Comic Sans MS", cursive;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+/* IMAGE */
+.imageBox {
+  flex: 1;
+  animation: slideLeft 1.5s ease;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+}
+
+.imageWrapper img {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow:
+    0 0 25px rgba(0, 194, 203, 0.6),
+    0 0 45px rgba(255,105,180,0.4);
+  transition: transform 0.4s;
+  display: block;
+  position: relative;
+  z-index: 2;
+}
+
+.imageWrapper img:hover {
+  transform: scale(1.05);
+}
+
+/* CŒURS QUI TOURNENT AUTOUR DE L'IMAGE */
+.heartsOrbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  border-radius: 50%;
+  animation: orbit 12s linear infinite;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.heart {
+  position: absolute;
+  font-size: 24px;
+  color: #ff3366;
+  filter: drop-shadow(0 0 8px rgba(255, 51, 102, 0.8));
+  transform-origin: center;
+}
+
+/* Positionnement des cœurs sur le cercle */
+.heart1 {
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.heart2 {
+  top: 15%;
+  right: -15px;
+  transform: translateY(-50%);
+}
+
+.heart3 {
+  bottom: 15%;
+  right: -15px;
+  transform: translateY(50%);
+}
+
+.heart4 {
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.heart5 {
+  bottom: 15%;
+  left: -15px;
+  transform: translateY(50%);
+}
+
+.heart6 {
+  top: 15%;
+  left: -15px;
+  transform: translateY(-50%);
+}
+
+.heart7 {
+  top: 5%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+}
+
+.heart8 {
+  top: 5%;
+  right: 20%;
+  transform: translate(50%, -50%);
+}
+
+/* Animation de rotation sur l'orbite */
+@keyframes orbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Animation individuelle pour que les cœurs gardent leur orientation */
+.heart {
+  animation: counterRotate 12s linear infinite;
+}
+
+@keyframes counterRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* Ajustements pour que les cœurs restent droits */
+.heart1, .heart4 {
+  animation: none; /* Ceux du haut et du bas n'ont pas besoin de contre-rotation */
+}
+
+.heart2, .heart3, .heart5, .heart6 {
+  animation: keepUpright 12s linear infinite;
+}
+
+@keyframes keepUpright {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* TEXTE */
+.content {
+  flex: 1;
+  animation: slideRight 1.5s ease;
+}
+
+.title {
+  font-size: 2.6rem;
+  color: #FF69B4;
+  margin-bottom: 20px;
+  text-shadow: 0 0 12px rgba(255,105,180,0.6);
+}
+
+.text {
+  font-size: 1.15rem;
+  color: #0A1F44;
+  margin-bottom: 15px;
+  line-height: 1.7;
+}
+
+/* ICON TITLE */
+.iconTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0A1F44;
+}
+
+.icon {
+  font-size: 28px;
+  color: #00C2CB;
+}
+
+/* BOXES */
+.objectives, .targets, .security {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 14px;
+}
+
+/* OBJECTIVE */
+.objectives {
+  background: rgba(0, 194, 203, 0.15);
+  border: 2px solid #00C2CB;
+}
+
+/* TARGET */
+.targets {
+  background: rgba(255,105,180,0.15);
+  border: 2px solid #FF69B4;
+}
+
+.targets ul {
+  padding-left: 20px;
+}
+
+.targets li {
+  margin-bottom: 6px;
+  color: #0A1F44;
+}
+
+/* SECURITY */
+.security {
+  background: rgba(10,31,68,0.1);
+  border: 2px solid #0A1F44;
+}
+
+/* GLOW */
+.glow {
+  box-shadow: 0 0 18px #00C2CB;
+}
+
+.glowPink {
+  box-shadow: 0 0 18px #FF69B4;
+}
+
+.glowBlue {
+  box-shadow: 0 0 18px #0A1F44;
+}
+
+/* ANIMATIONS */
+.animate {
+  animation: fadeUp 1.2s ease;
+}
+
+.animateDelay {
+  animation: fadeUp 1.8s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .imageBox {
+    order: -1;
+  }
+
+  .iconTitle {
+    justify-content: center;
+  }
+  
+  .heartsOrbit {
+    width: calc(100% + 30px);
+    height: calc(100% + 30px);
+  }
+  
+  .heart {
+    font-size: 20px;
+  }
+  
+  .heart1, .heart4 {
+    font-size: 20px;
+  }
+  
+  .heart2, .heart6 {
+    right: -12px;
+  }
+  
+  .heart3, .heart5 {
+    left: -12px;
+  }
+}

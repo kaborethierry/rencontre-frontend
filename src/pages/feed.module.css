@@ -1,0 +1,840 @@
+.feedContainer {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.animatedMessage {
+  background: linear-gradient(135deg, #FF69B4 0%, #ff4da6 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 50px;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animatedIcon {
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.messageText {
+  margin: 0;
+  animation: fadeInOut 4s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+.feedTitle {
+  text-align: center;
+  color: #FF69B4;
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(255,105,180,0.2);
+}
+
+.loginPrompt {
+  background: #e3f2fd;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  text-align: center;
+  border-left: 4px solid #FF69B4;
+}
+
+.loginPrompt p {
+  margin-bottom: 15px;
+  color: #0A1F44;
+  font-size: 1.1em;
+}
+
+.loginButton, .registerButton {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 0 10px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.loginButton {
+  background: #FF69B4;
+  color: white;
+}
+
+.loginButton:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.registerButton {
+  background: #0A1F44;
+  color: white;
+}
+
+.registerButton:hover {
+  background: #1a2f5a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(10,31,68,0.3);
+}
+
+.postCard {
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.postCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255,105,180,0.15);
+}
+
+.postHeader {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.postUserPhoto {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FF69B4;
+}
+
+.postHeaderInfo {
+  flex: 1;
+}
+
+.postInfo {
+  color: #666;
+  font-size: 0.9em;
+  margin: 5px 0;
+}
+
+.postDate {
+  color: #999;
+  font-size: 0.85em;
+}
+
+.postContent {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin: 15px 0;
+  padding: 15px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.postStats {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 15px;
+  padding: 0 5px;
+}
+
+.commentsToggle {
+  background: none;
+  border: none;
+  color: #FF69B4;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.commentsToggle:hover {
+  text-decoration: underline;
+}
+
+.postActions {
+  display: flex;
+  gap: 15px;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  padding: 15px 0;
+}
+
+.postActions button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 1em;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.postActions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.likeBtn {
+  color: #d32f2f;
+}
+
+.likeBtn:hover:not(:disabled) {
+  background: #ffebee;
+}
+
+.commentBtn {
+  color: #2e7d32;
+}
+
+.commentBtn:hover:not(:disabled) {
+  background: #e8f5e9;
+}
+
+.messageBtn {
+  color: #1565c0;
+}
+
+.messageBtn:hover:not(:disabled) {
+  background: #e3f2fd;
+}
+
+.commentsSection {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 15px;
+}
+
+.commentsSection h4 {
+  color: #FF69B4;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+}
+
+.commentItem {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  position: relative;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.commentUserPhoto {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.commentContent {
+  flex: 1;
+}
+
+.commentContent strong {
+  color: #FF69B4;
+  display: block;
+  margin-bottom: 3px;
+  font-size: 0.95em;
+}
+
+.commentContent p {
+  margin: 3px 0;
+  font-size: 0.95em;
+}
+
+.commentContent small {
+  color: #999;
+  font-size: 0.8em;
+}
+
+.deleteCommentBtn {
+  background: none;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  padding: 5px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+
+.deleteCommentBtn:hover {
+  background: #ffebee;
+}
+
+.addComment {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  align-items: center;
+}
+
+.addComment input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 0.95em;
+  transition: all 0.3s;
+}
+
+.addComment input:focus {
+  outline: none;
+  border-color: #FF69B4;
+  box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
+}
+
+.addComment button {
+  background: #FF69B4;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.addComment button:hover:not(:disabled) {
+  background: #ff4da6;
+  transform: scale(1.1);
+}
+
+.addComment button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.noPosts {
+  text-align: center;
+  color: #999;
+  font-size: 1.2em;
+  margin-top: 50px;
+  padding: 40px;
+  background: white;
+  border-radius: 15px;
+}
+
+@media (max-width: 600px) {
+  .animatedMessage {
+    font-size: 1rem;
+    padding: 15px;
+  }
+
+  .postActions {
+    flex-direction: column;
+  }
+
+  .postActions button {
+    width: 100%;
+  }
+
+  .commentItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .deleteCommentBtn {
+    position: static;
+    align-self: flex-end;
+    margin-top: 5px;
+  }
+
+  .addComment {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .addComment button {
+    width: 100%;
+    border-radius: 25px;
+  }
+
+  .loginPrompt .loginButton,
+  .loginPrompt .registerButton {
+    display: block;
+    margin: 10px auto;
+    width: 80%;
+  }
+}
+/* Ajoutez ces styles à la fin du fichier feed.module.css */
+
+.searchSection {
+  margin-bottom: 30px;
+}
+
+.searchBar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.searchBar input {
+  flex: 1;
+  min-width: 250px;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.searchBar input:focus {
+  outline: none;
+  border-color: #FF69B4;
+  box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
+}
+
+.searchBtn, .filterBtn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.searchBtn {
+  background: #FF69B4;
+  color: white;
+}
+
+.searchBtn:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.filterBtn {
+  background: #0A1F44;
+  color: white;
+  border: 2px solid #FF69B4;
+}
+
+.filterBtn.active {
+  background: #FF69B4;
+  color: #0A1F44;
+}
+
+.filterBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.filtersPanel {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-top: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border: 2px solid #FF69B4;
+}
+
+.filtersPanel h4 {
+  color: #FF69B4;
+  margin-bottom: 15px;
+}
+
+.filtersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.filterSelect, .filterInput {
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.filterSelect:focus, .filterInput:focus {
+  outline: none;
+  border-color: #FF69B4;
+}
+
+.ageRange {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ageRange input {
+  width: 80px;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.ageRange span {
+  color: #666;
+}
+
+.filterActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.applyFiltersBtn, .resetFiltersBtn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.applyFiltersBtn {
+  background: #28a745;
+  color: white;
+}
+
+.applyFiltersBtn:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+.resetFiltersBtn {
+  background: #dc3545;
+  color: white;
+}
+
+.resetFiltersBtn:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+.resultsSection {
+  margin-bottom: 40px;
+}
+
+.resultsSection h3 {
+  color: #FF69B4;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.resultCard {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.resultCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255,105,180,0.15);
+}
+
+.resultPhoto {
+  margin-bottom: 15px;
+}
+
+.resultImage {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FF69B4;
+}
+
+.resultInfo h4 {
+  color: #0A1F44;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+}
+
+.resultInfo p {
+  color: #666;
+  margin: 5px 0;
+  font-size: 0.95em;
+}
+
+.resultInfo p strong {
+  color: #FF69B4;
+}
+
+.resultActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.viewProfileBtn, .messageProfileBtn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.viewProfileBtn {
+  background: #0A1F44;
+  color: white;
+}
+
+.viewProfileBtn:hover {
+  background: #1a2f5a;
+  transform: translateY(-2px);
+}
+
+.messageProfileBtn {
+  background: #FF69B4;
+  color: white;
+}
+
+.messageProfileBtn:hover:not(:disabled) {
+  background: #ff4da6;
+  transform: translateY(-2px);
+}
+
+.messageProfileBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.noResults {
+  text-align: center;
+  color: #999;
+  font-size: 1.1em;
+  padding: 40px;
+  background: white;
+  border-radius: 15px;
+}
+
+@media (max-width: 768px) {
+  .searchBar {
+    flex-direction: column;
+  }
+  
+  .searchBar input {
+    width: 100%;
+  }
+  
+  .filtersGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ageRange {
+    justify-content: space-between;
+  }
+  
+  .ageRange input {
+    width: 45%;
+  }
+  
+  .filterActions {
+    flex-direction: column;
+  }
+  
+  .resultsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .resultActions {
+    flex-direction: column;
+  }
+}
+/* Styles supplémentaires pour la recherche */
+.searchInput {
+  flex: 1;
+  min-width: 250px;
+  padding: 15px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 30px;
+  font-size: 1rem;
+  transition: all 0.3s;
+  background: white;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #FF69B4;
+  box-shadow: 0 0 0 5px rgba(255,105,180,0.1);
+  transform: scale(1.02);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.noResults {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.noResultsIcon {
+  font-size: 4rem;
+  color: #FF69B4;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.noResults p {
+  color: #666;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.resetResultsBtn {
+  background: #FF69B4;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.resetResultsBtn:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+}
+/* Styles pour les posts de l'utilisateur */
+.ownPost {
+  border-left: 4px solid #FF69B4;
+  background: linear-gradient(to right, rgba(255,105,180,0.05), white);
+}
+
+.youBadge {
+  margin-left: 5px;
+  font-size: 0.8em;
+  color: #FF69B4;
+  font-weight: normal;
+  font-style: italic;
+}
+
+.ownComment {
+  background: #fff0f7;
+  border-left: 3px solid #FF69B4;
+}
+
+.connectedMessage {
+  background: #e8f5e9;
+  padding: 15px 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2e7d32;
+  font-weight: 500;
+  border-left: 4px solid #2e7d32;
+}
+
+.welcomeTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #FF69B4;
+  margin-bottom: 10px;
+}
+
+.welcomeMessage {
+  font-size: 1rem;
+  color: #0A1F44;
+  margin: 10px 0 20px 0;
+  line-height: 1.6;
+}
+
+.promptButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+@media (max-width: 600px) {
+  .promptButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .promptButtons .loginButton,
+  .promptButtons .registerButton {
+    width: 200px;
+    margin: 5px 0;
+  }
+}

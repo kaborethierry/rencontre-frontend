@@ -1,0 +1,766 @@
+.profileContainer {
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+
+.profileTitle {
+  text-align: center;
+  color: #FF69B4;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  text-shadow: 2px 2px 4px rgba(255,105,180,0.2);
+}
+
+.errorMessage {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-left: 4px solid #c62828;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.successMessage {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-left: 4px solid #2e7d32;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.profileCard {
+  max-width: 1000px;
+  margin: 0 auto 40px;
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  gap: 40px;
+  box-shadow: 0 10px 30px rgba(255,105,180,0.15);
+}
+
+.profilePhoto {
+  flex: 1;
+  text-align: center;
+}
+
+.photoWrapper {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #FF69B4;
+  box-shadow: 0 5px 15px rgba(255,105,180,0.3);
+}
+
+.profileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoUploadSection {
+  margin-top: 15px;
+}
+
+.photoLabel {
+  cursor: pointer;
+}
+
+.photoButton {
+  background: #FF69B4;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  transition: all 0.3s;
+}
+
+.photoButton:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.photoHint {
+  font-size: 0.85em;
+  color: #28a745;
+  margin-top: 5px;
+}
+
+.photoInput {
+  margin-top: 15px;
+  width: 100%;
+}
+
+.blur {
+  filter: blur(8px);
+}
+
+.togglePhoto {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: #FF69B4;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  transition: all 0.3s;
+}
+
+.togglePhoto:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.profileInfo {
+  flex: 2;
+}
+
+.profileInfo h3 {
+  font-size: 2em;
+  color: #FF69B4;
+  margin-bottom: 20px;
+}
+
+.profileInfo p {
+  margin: 10px 0;
+  font-size: 1.1em;
+  line-height: 1.6;
+  color: #444;
+}
+
+.profileInfo p strong {
+  color: #FF69B4;
+  min-width: 120px;
+  display: inline-block;
+}
+
+.profileInfo input,
+.profileInfo select,
+.profileInfo textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1em;
+  transition: all 0.3s;
+}
+
+.profileInfo input:focus,
+.profileInfo select:focus,
+.profileInfo textarea:focus {
+  border-color: #FF69B4;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
+}
+
+.profileInfo input:disabled,
+.profileInfo select:disabled,
+.profileInfo textarea:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.saveBtn {
+  background: #28a745;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1em;
+  margin-top: 15px;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(40,167,69,0.3);
+}
+
+.saveBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background: #6c757d;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1em;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(108,117,125,0.3);
+}
+
+.editActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.profileButtons {
+  margin-top: 25px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.editBtn {
+  background: #FF69B4;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.editBtn:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+}
+
+.deleteBtn {
+  background: #8B0000;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.deleteBtn:hover {
+  background: #a00000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(139,0,0,0.3);
+}
+
+.postSection {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(255,105,180,0.15);
+}
+
+.postSection h3 {
+  color: #FF69B4;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.postSection textarea {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1em;
+  resize: vertical;
+  font-family: inherit;
+  transition: all 0.3s;
+}
+
+.postSection textarea:focus {
+  border-color: #FF69B4;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
+}
+
+.postSection button {
+  margin-top: 15px;
+  background: #FF69B4;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  transition: all 0.3s;
+}
+
+.postSection button:hover:not(:disabled) {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+}
+
+.postSection button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.feed {
+  max-width: 1000px;
+  margin: auto;
+}
+
+.feed h3 {
+  color: #FF69B4;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.postCard {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(255,105,180,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.postCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255,105,180,0.15);
+}
+
+.postHeader {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.postUserPhoto {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FF69B4;
+}
+
+.postInfo {
+  color: #666;
+  font-size: 0.9em;
+  margin: 5px 0;
+}
+
+.postDate {
+  color: #999;
+  font-size: 0.85em;
+}
+
+.postContent {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin: 15px 0;
+  padding: 15px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.postStats {
+  display: flex;
+  gap: 20px;
+  color: #666;
+  font-size: 0.95em;
+  margin-bottom: 15px;
+}
+
+.postActions {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.likeBtn {
+  background: #fff0f0;
+  color: #d32f2f;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.95em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.likeBtn:hover {
+  background: #ffcdd2;
+  transform: translateY(-2px);
+}
+
+.editPostBtn {
+  background: #fff3e0;
+  color: #ff9800;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.95em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.editPostBtn:hover {
+  background: #ffe0b2;
+  transform: translateY(-2px);
+}
+
+.deletePostBtn {
+  background: #ffebee;
+  color: #c62828;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.95em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.deletePostBtn:hover {
+  background: #ffcdd2;
+  transform: translateY(-2px);
+}
+
+.editPost {
+  margin: 15px 0;
+}
+
+.editPost textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #FF69B4;
+  border-radius: 8px;
+  font-size: 1em;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.editActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.saveEditBtn, .cancelEditBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.95em;
+  transition: all 0.3s;
+  flex: 1;
+  justify-content: center;
+}
+
+.saveEditBtn {
+  background: #28a745;
+  color: white;
+}
+
+.saveEditBtn:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+.cancelEditBtn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancelEditBtn:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+.edited {
+  color: #FF69B4;
+  font-size: 0.85em;
+  font-style: italic;
+  margin-left: 5px;
+}
+
+.commentsSection {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.commentsSection h4 {
+  color: #FF69B4;
+  margin-bottom: 15px;
+}
+
+.commentItem {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  position: relative;
+  border-left: 3px solid #FF69B4;
+}
+
+.commentUserPhoto {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.commentContent {
+  flex: 1;
+}
+
+.commentContent strong {
+  color: #FF69B4;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.commentContent p {
+  margin: 5px 0;
+  color: #333;
+}
+
+.commentContent small {
+  color: #999;
+  font-size: 0.8em;
+}
+
+.deleteCommentBtn {
+  background: none;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  padding: 5px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.deleteCommentBtn:hover {
+  background: #ffebee;
+  transform: scale(1.1);
+}
+
+.addComment {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.addComment input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 0.95em;
+  transition: all 0.3s;
+}
+
+.addComment input:focus {
+  outline: none;
+  border-color: #FF69B4;
+  box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
+}
+
+.addComment button {
+  background: #FF69B4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.95em;
+  transition: all 0.3s;
+}
+
+.addComment button:hover:not(:disabled) {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.addComment button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.noPosts {
+  text-align: center;
+  color: #999;
+  font-size: 1.2em;
+  margin-top: 30px;
+  padding: 40px;
+  background: white;
+  border-radius: 15px;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.3em;
+  color: #FF69B4;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (max-width: 768px) {
+  .profileCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .profileButtons {
+    flex-direction: column;
+  }
+
+  .postActions {
+    flex-direction: column;
+  }
+
+  .addComment {
+    flex-direction: column;
+  }
+
+  .addComment button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .commentItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .deleteCommentBtn {
+    position: static;
+    align-self: flex-end;
+    margin-top: 5px;
+  }
+
+  .editActions {
+    flex-direction: column;
+  }
+
+  .profileInfo p strong {
+    min-width: auto;
+    display: inline;
+    margin-right: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileTitle {
+    font-size: 2em;
+  }
+
+  .postCard {
+    padding: 15px;
+  }
+
+  .postHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+.deleteAccountBtn {
+  background: #8B0000;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+  opacity: 1;
+}
+
+.deleteAccountBtn:hover:not(:disabled) {
+  background: #a00000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(139,0,0,0.3);
+}
+
+.deleteAccountBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}

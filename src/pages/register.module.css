@@ -1,0 +1,217 @@
+.registerContainer {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(255,105,180,0.15);
+}
+
+.registerContainer h2 {
+  text-align: center;
+  color: #FF69B4;
+  margin-bottom: 25px;
+  font-size: 2em;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-left: 4px solid #c62828;
+}
+
+.photoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.photoPreview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #FF69B4;
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  text-align: center;
+  padding: 10px;
+}
+
+.photoPlaceholder p {
+  font-size: 0.8em;
+  margin-top: 5px;
+}
+
+.photoLabel {
+  cursor: pointer;
+}
+
+.photoButton {
+  background: #FF69B4;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95em;
+  transition: all 0.3s;
+}
+
+.photoButton:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+}
+
+.registerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.registerForm input,
+.registerForm select,
+.registerForm textarea {
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.registerForm input:focus,
+.registerForm select:focus,
+.registerForm textarea:focus {
+  outline: none;
+  border-color: #FF69B4;
+  box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
+}
+
+/* Styles pour les champs de mot de passe */
+.passwordWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.passwordInput {
+  width: 100%;
+  padding-right: 45px !important; /* Espace pour le bouton */
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #FF69B4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.passwordToggle:hover {
+  background: rgba(255,105,180,0.1);
+}
+
+.passwordToggle svg {
+  font-size: 20px;
+}
+
+.registerForm button[type="submit"] {
+  background: linear-gradient(135deg, #FF69B4 0%, #ff4da6 100%);
+  color: white;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.registerForm button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255,105,180,0.4);
+}
+
+.registerForm button[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.registerForm button[type="submit"].loading {
+  position: relative;
+  color: transparent;
+}
+
+.registerForm button[type="submit"].loading::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid white;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.loginLink {
+  text-align: center;
+  margin-top: 25px;
+  color: #666;
+}
+
+.loginLink a {
+  color: #FF69B4;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.loginLink a:hover {
+  color: #ff4da6;
+  text-decoration: underline;
+}

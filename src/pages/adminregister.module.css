@@ -1,0 +1,285 @@
+.adminRegisterContainer {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0A1F44 0%, #1a2f5a 100%);
+    padding: 20px;
+  }
+  
+  .adminRegisterCard {
+    max-width: 480px;
+    width: 100%;
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    animation: fadeInUp 0.6s ease;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .adminHeader {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .adminIcon {
+    font-size: 4rem !important;
+    color: #FF69B4;
+    background: rgba(255,105,180,0.1);
+    padding: 15px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+  }
+  
+  .adminHeader h2 {
+    color: #0A1F44;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+  }
+  
+  .adminSubtitle {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+  
+  .error {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-left: 4px solid #c62828;
+    font-size: 0.95rem;
+  }
+  
+  .success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-left: 4px solid #2e7d32;
+    font-size: 0.95rem;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+  
+  .adminForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .inputGroup label {
+    color: #555;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .inputIcon {
+    font-size: 1.2rem !important;
+    color: #FF69B4;
+  }
+  
+  .inputGroup input {
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    background: #f8f9fa;
+  }
+  
+  .inputGroup input:focus {
+    outline: none;
+    border-color: #FF69B4;
+    box-shadow: 0 0 0 4px rgba(255,105,180,0.1);
+    background: white;
+  }
+  
+  .inputGroup input:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+  }
+  
+  .passwordWrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  .passwordInput {
+    width: 100%;
+    padding-right: 45px !important;
+  }
+  
+  .passwordToggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #FF69B4;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+  
+  .passwordToggle:hover {
+    background: rgba(255,105,180,0.1);
+  }
+  
+  .passwordToggle svg {
+    font-size: 20px;
+  }
+  
+  .adminButton {
+    background: linear-gradient(135deg, #FF69B4 0%, #ff4da6 100%);
+    color: white;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    position: relative;
+    width: 100%;
+  }
+  
+  .adminButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,105,180,0.4);
+  }
+  
+  .adminButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .adminButton.loading {
+    color: transparent;
+  }
+  
+  .adminButton.loading::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid white;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  
+  .adminFooter {
+    margin-top: 25px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  .adminFooter p {
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+  
+  .loginLink {
+    background: transparent;
+    color: #FF69B4;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: inline-block;
+    border: 2px solid #FF69B4;
+  }
+  
+  .loginLink:hover {
+    background: #FF69B4;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+  }
+  
+  .backToSite {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .backLink {
+    color: #999;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .backLink:hover {
+    color: #FF69B4;
+  }
+  
+  @media (max-width: 480px) {
+    .adminRegisterCard {
+      padding: 30px 20px;
+    }
+  
+    .adminHeader h2 {
+      font-size: 1.6rem;
+    }
+  
+    .adminIcon {
+      font-size: 3rem !important;
+      padding: 12px;
+    }
+  
+    .inputGroup label {
+      font-size: 0.9rem;
+    }
+  }

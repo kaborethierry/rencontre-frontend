@@ -1,0 +1,390 @@
+.hero {
+  height: 90vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Image de fond */
+.heroBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("/hero.jpg") center/cover no-repeat;
+  z-index: 1;
+}
+
+/* Overlay plus léger pour voir l'image */
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* Assombrit légèrement pour faire ressortir le texte */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 2;
+}
+
+/* Conteneur des coeurs animés */
+.heartsContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.heart {
+  position: absolute;
+  bottom: -50px;
+  animation: floatUp linear infinite;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px currentColor);
+  will-change: transform, opacity;
+  z-index: 3;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-20vh) translateX(calc(var(--x-offset) * 0.25)) rotate(90deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-40vh) translateX(calc(var(--x-offset) * 0.5)) rotate(180deg);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(-60vh) translateX(calc(var(--x-offset) * 0.75)) rotate(270deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(var(--x-offset)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.heroContent {
+  position: relative;
+  text-align: center;
+  animation: fadeIn 2s ease;
+  padding: 0 20px;
+  z-index: 10;
+  max-width: 800px;
+}
+
+/* TITRE */
+.title {
+  font-size: 4rem;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
+}
+
+.titleHighlight {
+  color: #FF69B4;
+  display: block;
+  font-size: 4.5rem;
+  background: linear-gradient(45deg, #FF69B4, #FF1493);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titlePulse 3s ease-in-out infinite;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes titlePulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px #FF69B4);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px #FF1493);
+  }
+}
+
+/* SOUS-TITRE */
+.subtitle {
+  font-size: 1.4rem;
+  margin-top: 20px;
+  font-family: "Montserrat", sans-serif;
+  color: white;
+  font-weight: 500;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 50px;
+  backdrop-filter: blur(5px);
+}
+
+/* BOUTONS */
+.ctaGroup {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.btnPrimary {
+  background: #a00000;
+  padding: 15px 40px;
+  border-radius: 50px;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid #a00000;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 0 4px 15px rgba(160, 0, 0, 0.3);
+}
+
+.btnPrimary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+  z-index: -1;
+}
+
+.btnPrimary:hover::before {
+  left: 100%;
+}
+
+.btnPrimary:hover {
+  background: #c00000;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(160, 0, 0, 0.5);
+}
+
+.btnSecondary {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 15px 40px;
+  border-radius: 50px;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+  border: 2px solid white;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btnSecondary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  z-index: -1;
+}
+
+.btnSecondary:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btnSecondary:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Coeurs flottants décoratifs */
+.floatingHearts {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.floatingHeart {
+  font-size: 2rem;
+  animation: floating 3s ease-in-out infinite;
+  filter: drop-shadow(0 5px 15px rgba(255,105,180,0.5));
+}
+
+.floatingHeart:nth-child(1) { animation-delay: 0s; color: #FF69B4; }
+.floatingHeart:nth-child(2) { animation-delay: 0.5s; color: #FF0000; }
+.floatingHeart:nth-child(3) { animation-delay: 1s; color: #4169E1; }
+.floatingHeart:nth-child(4) { animation-delay: 1.5s; color: #FF69B4; }
+.floatingHeart:nth-child(5) { animation-delay: 2s; color: #FF0000; }
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(10deg);
+  }
+  75% {
+    transform: translateY(10px) rotate(-10deg);
+  }
+}
+
+/* Animation principale */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}
+
+/* Style pour les icônes MUI */
+.btnPrimary svg {
+  font-size: 1.4rem;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+}
+
+/* Effet de vague au survol */
+.btnPrimary::after,
+.btnSecondary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+  pointer-events: none;
+}
+
+.btnPrimary:active::after,
+.btnSecondary:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 0;
+  transition: width 0.3s, height 0.3s, opacity 0.3s;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .title {
+    font-size: 3.5rem;
+  }
+  
+  .titleHighlight {
+    font-size: 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: 80vh;
+  }
+
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .titleHighlight {
+    font-size: 3rem;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    padding: 10px 15px;
+  }
+
+  .ctaGroup {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+    max-width: 280px;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    justify-content: center;
+  }
+
+  .floatingHearts {
+    gap: 10px;
+  }
+
+  .floatingHeart {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .titleHighlight {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    max-width: 240px;
+    padding: 10px 25px;
+    font-size: 1rem;
+  }
+
+  .floatingHeart {
+    font-size: 1.2rem;
+  }
+}

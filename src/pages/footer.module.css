@@ -1,0 +1,216 @@
+.footer {
+    background: linear-gradient(135deg, #0A1F44 0%, #1a2f5a 100%);
+    color: white;
+    padding: 60px 20px 20px;
+    margin-top: 60px;
+  }
+  
+  .footerContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .footerGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    margin-bottom: 40px;
+  }
+  
+  .footerSection h3 {
+    color: #FF69B4;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+  }
+  
+  .footerSection p {
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+  
+  .socialLinks {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .socialLink {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.3s;
+  }
+  
+  .socialLink:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+  }
+  
+  .footerLinks {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footerLinks li {
+    margin-bottom: 12px;
+  }
+  
+  .footerLinks a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .footerLinks a:hover {
+    color: #FF69B4;
+    padding-left: 5px;
+  }
+  
+  .contactInfo {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .contactInfo li {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    color: #ccc;
+  }
+  
+  .contactIcon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  
+  .contactInfo strong {
+    color: #FF69B4;
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.9rem;
+  }
+  
+  .contactInfo p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  
+  .newsletterForm {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .newsletterInput {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #FF69B4;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 0.95rem;
+  }
+  
+  .newsletterInput::placeholder {
+    color: #999;
+  }
+  
+  .newsletterInput:focus {
+    outline: none;
+    background: rgba(255,255,255,0.15);
+  }
+  
+  .newsletterBtn {
+    background: #FF69B4;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  
+  .newsletterBtn:hover {
+    background: #ff4da6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255,105,180,0.3);
+  }
+  
+  .horaires {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(255,105,180,0.1);
+    border-radius: 8px;
+    color: #FF69B4 !important;
+    text-align: center;
+  }
+  
+  .copyright {
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+  }
+  
+  .copyright p {
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin: 5px 0;
+  }
+  
+  .copyrightIcon {
+    font-size: 1rem;
+    color: #FF69B4;
+  }
+  
+  .credit {
+    color: #FF69B4 !important;
+    font-style: italic;
+  }
+  
+  @media (max-width: 1024px) {
+    .footerGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .footerGrid {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    
+    .footerSection {
+      text-align: center;
+    }
+    
+    .socialLinks {
+      justify-content: center;
+    }
+    
+    .contactInfo li {
+      justify-content: center;
+    }
+    
+    .newsletterForm {
+      flex-direction: column;
+    }
+    
+    .newsletterBtn {
+      width: 100%;
+    }
+  }
