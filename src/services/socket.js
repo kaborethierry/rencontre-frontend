@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 class SocketService {
   constructor() {
     this.socket = null;
-    this.listeners = new Map(); // Pour stocker les callbacks par événement
+    this.listeners = new Map();
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
@@ -18,14 +18,14 @@ class SocketService {
       return null;
     }
 
-    // Éviter les connexions multiples
     if (this.socket?.connected) {
       console.log('✅ Socket déjà connecté');
       return this.socket;
     }
 
     try {
-      this.socket = io('http://localhost:5000', {
+      // 👇 LIGNE MODIFIÉE - URL de votre backend Hostinger
+      this.socket = io('https://green-alpaca-449310.hostingersite.com', {
         auth: { token },
         transports: ['websocket'],
         reconnection: true,
@@ -35,25 +35,21 @@ class SocketService {
         timeout: 10000
       });
 
-      // Gestionnaire de connexion
       this.socket.on('connect', () => {
         console.log('✅ Socket connecté avec succès');
         this.isConnected = true;
         this.reconnectAttempts = 0;
       });
 
-      // Gestionnaire de déconnexion
       this.socket.on('disconnect', (reason) => {
         console.log('🔴 Socket déconnecté:', reason);
         this.isConnected = false;
         
         if (reason === 'io server disconnect') {
-          // Déconnexion initiée par le serveur, on ne reconnecte pas
           console.log('Déconnexion serveur');
         }
       });
 
-      // Gestionnaire d'erreur de connexion
       this.socket.on('connect_error', (error) => {
         console.error('❌ Erreur de connexion socket:', error.message);
         this.reconnectAttempts++;
@@ -64,19 +60,16 @@ class SocketService {
         }
       });
 
-      // Gestionnaire de reconnexion
       this.socket.on('reconnect', (attemptNumber) => {
         console.log(`🔄 Socket reconnecté après ${attemptNumber} tentatives`);
         this.isConnected = true;
         this.reconnectAttempts = 0;
       });
 
-      // Gestionnaire d'erreur de reconnexion
       this.socket.on('reconnect_error', (error) => {
         console.error('❌ Erreur de reconnexion:', error.message);
       });
 
-      // Gestionnaire d'événements personnalisés
       this.setupEventListeners();
 
       return this.socket;
@@ -87,47 +80,39 @@ class SocketService {
     }
   }
 
-  // Configurer les écouteurs d'événements par défaut
   setupEventListeners() {
     if (!this.socket) return;
 
-    // Écouter les erreurs
     this.socket.on('message-error', (data) => {
       console.error('❌ Erreur message:', data.error);
       this.triggerCallbacks('message-error', data);
     });
 
-    // Écouter les notifications
     this.socket.on('new-notification', (data) => {
       console.log('📢 Nouvelle notification reçue:', data);
       this.triggerCallbacks('new-notification', data);
     });
 
-    // Écouter les messages reçus
     this.socket.on('receive-message', (data) => {
       console.log('📨 Message reçu:', data);
       this.triggerCallbacks('receive-message', data);
     });
 
-    // Écouter les messages envoyés
     this.socket.on('message-sent', (data) => {
       console.log('✅ Message envoyé:', data);
       this.triggerCallbacks('message-sent', data);
     });
 
-    // Écouter les indicateurs de frappe
     this.socket.on('user-typing', (data) => {
       this.triggerCallbacks('user-typing', data);
     });
 
-    // Écouter les confirmations de lecture
     this.socket.on('messages-read', (data) => {
       console.log('📖 Messages lus:', data);
       this.triggerCallbacks('messages-read', data);
     });
   }
 
-  // Déconnecter le socket
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
@@ -138,12 +123,10 @@ class SocketService {
     }
   }
 
-  // Vérifier si le socket est connecté
   isSocketConnected() {
     return this.socket?.connected || false;
   }
 
-  // Envoyer un message
   sendMessage(data) {
     if (!this.socket?.connected) {
       console.error('❌ Socket non connecté');
@@ -159,7 +142,6 @@ class SocketService {
     }
   }
 
-  // Marquer les messages comme lus
   markAsRead(messageIds, senderId) {
     if (!this.socket?.connected) {
       console.error('❌ Socket non connecté');
@@ -175,7 +157,6 @@ class SocketService {
     }
   }
 
-  // Indiquer que l'utilisateur est en train d'écrire
   sendTyping(receiverId, isTyping) {
     if (!this.socket?.connected) {
       return false;
@@ -190,7 +171,6 @@ class SocketService {
     }
   }
 
-  // Méthode générique pour ajouter un écouteur
   on(event, callback) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
@@ -198,21 +178,17 @@ class SocketService {
     this.listeners.get(event).push(callback);
   }
 
-  // Méthode générique pour retirer un écouteur
   off(event, callback) {
     if (!this.listeners.has(event)) return;
     
     if (callback) {
-      // Retirer un callback spécifique
       const callbacks = this.listeners.get(event).filter(cb => cb !== callback);
       this.listeners.set(event, callbacks);
     } else {
-      // Retirer tous les callbacks pour cet événement
       this.listeners.delete(event);
     }
   }
 
-  // Déclencher tous les callbacks pour un événement
   triggerCallbacks(event, data) {
     if (this.listeners.has(event)) {
       this.listeners.get(event).forEach(callback => {
@@ -225,7 +201,6 @@ class SocketService {
     }
   }
 
-  // Méthodes spécifiques pour chaque type d'événement (compatibilité ascendante)
   onNewMessage(callback) {
     this.on('receive-message', callback);
   }
@@ -250,7 +225,6 @@ class SocketService {
     this.on('message-error', callback);
   }
 
-  // Méthodes pour retirer les écouteurs spécifiques
   offNewMessage(callback) {
     this.off('receive-message', callback);
   }
@@ -275,12 +249,10 @@ class SocketService {
     this.off('message-error', callback);
   }
 
-  // Nettoyer tous les écouteurs
   clearAllListeners() {
     this.listeners.clear();
   }
 }
 
-// Créer et exporter une instance unique
 const socketService = new SocketService();
 export default socketService;
