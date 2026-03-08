@@ -1,9 +1,32 @@
 // src/services/api.js
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+// Déterminer l'URL de l'API en fonction de l'environnement
+const API_URL = (() => {
+  // Vérifier si on est dans le navigateur
+  if (typeof window !== 'undefined') {
+    // Si on est sur le domaine de production
+    if (window.location.hostname === 'rencontreauthentique.org') {
+      console.log('🌍 Production détectée, utilisation du backend Hostinger');
+      return 'https://green-alpaca-449310.hostingersite.com/api';
+    }
+    // Si on est en développement local
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('💻 Développement local détecté');
+      return 'http://localhost:5000/api';
+    }
+  }
+  
+  // Fallback : utiliser la variable d'environnement ou localhost
+  console.log('🔧 Utilisation de la variable d\'environnement ou fallback');
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+})();
+
+console.log('🚀 API_URL finale utilisée:', API_URL);
 
 class ApiService {
   constructor() {
     this.baseURL = API_URL;
+    console.log('📡 ApiService initialisé avec baseURL:', this.baseURL);
   }
 
   getToken() {
@@ -50,7 +73,7 @@ class ApiService {
         }
       }
     } catch (error) {
-      console.error('Erreur parsing:', error);
+      console.error('❌ Erreur parsing:', error);
       data = { message: 'Erreur de communication' };
     }
     
