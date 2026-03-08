@@ -365,16 +365,56 @@
   color: #999;
 }
 
-.userAvatar {
+.avatarWrapper, .miniAvatarWrapper, .conversationAvatarWrapper, .messageAvatarWrapper {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  object-fit: cover;
+  overflow: hidden;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.miniAvatar {
+.miniAvatarWrapper {
   width: 25px;
   height: 25px;
+}
+
+.conversationAvatarWrapper {
+  width: 30px;
+  height: 30px;
+}
+
+.messageAvatarWrapper {
+  width: 35px;
+  height: 35px;
+}
+
+.avatarFallback, .miniAvatarFallback, .avatarFallbackSmall {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FF69B4;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.8rem;
+}
+
+.miniAvatarFallback {
+  background: #0A1F44;
+}
+
+.avatarFallbackSmall {
+  background: #999;
+  font-size: 0.7rem;
+}
+
+.userAvatar, .miniAvatar, .conversationAvatar, .messageAvatar {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -625,6 +665,26 @@
 .messageBubble small {
   color: #999;
   font-size: 0.8rem;
+}
+
+.messageImageContainer {
+  max-width: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.messageImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.messageImage:hover {
+  transform: scale(1.05);
 }
 
 .viewMessagesBtn {

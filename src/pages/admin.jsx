@@ -27,6 +27,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ReplyIcon from "@mui/icons-material/Reply";
 import WarningIcon from "@mui/icons-material/Warning";
 import ImageIcon from "@mui/icons-material/Image";
+import PersonIcon from "@mui/icons-material/Person";
 
 export default function Admin({ user }) {
   const router = useRouter();
@@ -44,6 +45,30 @@ export default function Admin({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [onlineUsers, setOnlineUsers] = useState(0);
   const [imageErrors, setImageErrors] = useState({});
+
+  // ✅ URL de base dynamique
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hostname === 'rencontreauthentique.org') {
+        return 'https://green-alpaca-449310.hostingersite.com';
+      }
+    }
+    return 'http://localhost:5000';
+  };
+
+  // ✅ Fonction corrigée pour les images
+  const getImageUrl = (photo) => {
+    const baseUrl = getBaseUrl();
+    
+    if (!photo) return "/default-avatar.png";
+    if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
+    if (photo.startsWith('/uploads')) return `${baseUrl}${photo}`;
+    return `${baseUrl}/uploads/profiles/${photo}`;
+  };
+
+  const handleImageError = (id) => {
+    setImageErrors(prev => ({ ...prev, [id]: true }));
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -179,17 +204,6 @@ export default function Admin({ user }) {
     u.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const getImageUrl = (photo) => {
-    if (!photo) return "/default-avatar.png";
-    if (photo.startsWith('http')) return photo;
-    if (photo.startsWith('/uploads')) return `http://localhost:5000${photo}`;
-    return `http://localhost:5000/uploads/${photo}`;
-  };
-
-  const handleImageError = (id) => {
-    setImageErrors(prev => ({ ...prev, [id]: true }));
-  };
 
   if (loading) {
     return <div className={styles.loading}>Chargement du portail admin...</div>;
@@ -530,7 +544,7 @@ export default function Admin({ user }) {
                         </td>
                         <td>{post.prenom} {post.nom}</td>
                         <td className={styles.postContentCell}>
-                          {post.content.substring(0, 50)}...
+                          {post.content?.substring(0, 50)}...
                         </td>
                         <td>{post.age || '-'}</td>
                         <td>{post.ville || '-'}</td>
