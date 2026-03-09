@@ -16,8 +16,7 @@ const API_URL = (() => {
     }
   }
   
-  // Fallback : utiliser la variable d'environnement ou localhost
-  console.log('🔧 Utilisation de la variable d\'environnement ou fallback');
+  // Fallback : utiliser la variable d'environnement
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 })();
 
@@ -29,6 +28,10 @@ class ApiService {
     console.log('📡 ApiService initialisé avec baseURL:', this.baseURL);
   }
 
+  /**
+   * Récupère le token JWT depuis le localStorage
+   * @returns {string|null} Le token ou null si non trouvé
+   */
   getToken() {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('token');
@@ -36,6 +39,10 @@ class ApiService {
     return null;
   }
 
+  /**
+   * Récupère l'utilisateur connecté depuis le localStorage
+   * @returns {Object|null} L'utilisateur ou null si non trouvé
+   */
   getUser() {
     if (typeof window !== 'undefined') {
       const user = localStorage.getItem('user');
@@ -44,6 +51,10 @@ class ApiService {
     return null;
   }
 
+  /**
+   * Génère les en-têtes HTTP pour les requêtes
+   * @returns {Object} Les en-têtes avec Content-Type et Authorization si token présent
+   */
   getHeaders() {
     const headers = {
       'Content-Type': 'application/json',
@@ -57,6 +68,12 @@ class ApiService {
     return headers;
   }
 
+  /**
+   * Traite la réponse de l'API
+   * @param {Response} response - La réponse fetch
+   * @returns {Promise<any>} Les données parsées
+   * @throws {Error} Si la réponse n'est pas OK
+   */
   async handleResponse(response) {
     const contentType = response.headers.get('content-type');
     let data;
@@ -78,6 +95,7 @@ class ApiService {
     }
     
     if (!response.ok) {
+      // Gestion spéciale pour 401 (non autorisé)
       if (response.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -98,6 +116,11 @@ class ApiService {
     return data;
   }
 
+  /**
+   * Requête GET
+   * @param {string} endpoint - L'endpoint à appeler
+   * @returns {Promise<any>} Les données de la réponse
+   */
   async get(endpoint) {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       method: 'GET',
@@ -106,6 +129,12 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  /**
+   * Requête POST
+   * @param {string} endpoint - L'endpoint à appeler
+   * @param {any} data - Les données à envoyer
+   * @returns {Promise<any>} Les données de la réponse
+   */
   async post(endpoint, data) {
     const isFormData = data instanceof FormData;
     const headers = isFormData ? {
@@ -120,6 +149,12 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  /**
+   * Requête PUT
+   * @param {string} endpoint - L'endpoint à appeler
+   * @param {any} data - Les données à envoyer
+   * @returns {Promise<any>} Les données de la réponse
+   */
   async put(endpoint, data) {
     const isFormData = data instanceof FormData;
     const headers = isFormData ? {
@@ -134,6 +169,11 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  /**
+   * Requête DELETE
+   * @param {string} endpoint - L'endpoint à appeler
+   * @returns {Promise<any>} Les données de la réponse
+   */
   async delete(endpoint) {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       method: 'DELETE',
@@ -143,4 +183,6 @@ class ApiService {
   }
 }
 
-export default new ApiService();
+// Créer et exporter une instance unique du service
+const apiService = new ApiService();
+export default apiService;
