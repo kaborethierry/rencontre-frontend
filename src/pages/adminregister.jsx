@@ -64,13 +64,12 @@ export default function AdminRegister() {
         statut: "Célibataire"
       };
 
-      // ✅ CORRECTION 1: Utiliser api au lieu de fetch
       const response = await api.post('/auth/register', adminData);
       
-      // 2. Mettre à jour le rôle en admin
+      // 2. Récupérer le token de la réponse
       const token = response.token;
       
-      // ✅ CORRECTION 2: Utiliser api pour la mise à jour du rôle
+      // 3. Mettre à jour le rôle en admin (utiliser le token dans les headers)
       const roleResponse = await api.put('/users/profile', { role: 'admin' });
 
       if (!roleResponse) {
