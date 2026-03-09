@@ -29,7 +29,6 @@ import WcIcon from "@mui/icons-material/Wc";
 export default function Navbar({ user, setUser }) {
   const [open, setOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -43,9 +42,6 @@ export default function Navbar({ user, setUser }) {
           loadUnreadCount();
         });
 
-        socketService.onNewNotification(() => {
-          loadUnreadCount();
-        });
       } catch (error) {
         console.error("Erreur connexion socket:", error);
       }
@@ -62,13 +58,10 @@ export default function Navbar({ user, setUser }) {
 
   const loadUnreadCount = async () => {
     try {
-      const [messagesRes, notificationsRes] = await Promise.all([
-        api.get('/messages/unread-count').catch(() => ({ count: 0 })),
-        api.get('/notifications/unread-count').catch(() => ({ count: 0 }))
-      ]);
-
+      // ✅ SUPPRIMER L'APPEL À /notifications/unread-count
+      const messagesRes = await api.get('/messages/unread-count').catch(() => ({ count: 0 }));
+      
       setUnreadMessages(messagesRes.count || 0);
-      setUnreadNotifications(notificationsRes.count || 0);
     } catch (error) {
       console.error("Erreur chargement compteurs:", error);
     }
@@ -88,9 +81,7 @@ export default function Navbar({ user, setUser }) {
 
   const closeMenu = () => setOpen(false);
 
-  const totalUnread = unreadMessages + unreadNotifications;
-
-  // Choisir une icône aléatoire pour l'amour (change à chaque rafraîchissement)
+  // Choisir une icône aléatoire pour l'amour
   const loveIcons = [
     <FavoriteIcon key="fav" />,
     <FavoriteBorderIcon key="favborder" />,
@@ -101,7 +92,6 @@ export default function Navbar({ user, setUser }) {
     <WcIcon key="wc" />
   ];
   
-  // Prendre une icône basée sur l'heure pour la stabilité
   const loveIcon = loveIcons[new Date().getHours() % loveIcons.length];
 
   return (
@@ -145,8 +135,8 @@ export default function Navbar({ user, setUser }) {
               </Link>
               <Link href="/messages" className={styles.messageLink} onClick={closeMenu}>
                 <MessageIcon /> Messages
-                {totalUnread > 0 && (
-                  <span className={styles.badge}>{totalUnread}</span>
+                {unreadMessages > 0 && (
+                  <span className={styles.badge}>{unreadMessages}</span>
                 )}
               </Link>
               <button onClick={() => { handleLogout(); closeMenu(); }} className={styles.btnLogout}>
