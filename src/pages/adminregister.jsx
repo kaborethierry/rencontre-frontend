@@ -64,21 +64,16 @@ export default function AdminRegister() {
         statut: "Célibataire"
       };
 
+      // ✅ CORRECTION 1: Utiliser api au lieu de fetch
       const response = await api.post('/auth/register', adminData);
       
       // 2. Mettre à jour le rôle en admin
       const token = response.token;
       
-      const roleResponse = await fetch('http://localhost:5000/api/users/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ role: 'admin' })
-      });
+      // ✅ CORRECTION 2: Utiliser api pour la mise à jour du rôle
+      const roleResponse = await api.put('/users/profile', { role: 'admin' });
 
-      if (!roleResponse.ok) {
+      if (!roleResponse) {
         throw new Error("Erreur lors de la mise à jour du rôle");
       }
 
@@ -89,7 +84,7 @@ export default function AdminRegister() {
       }, 2000);
       
     } catch (err) {
-      console.error("Erreur inscription:", err);
+      console.error("❌ Erreur inscription:", err);
       setError(err.message || "Une erreur est survenue lors de l'inscription");
     } finally {
       setLoading(false);
