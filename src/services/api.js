@@ -4,8 +4,9 @@
 const API_URL = (() => {
   // Vérifier si on est dans le navigateur
   if (typeof window !== 'undefined') {
-    // Si on est sur le domaine de production
-    if (window.location.hostname === 'rencontreauthentique.org') {
+    // Si on est sur le domaine de production (avec ou sans www)
+    if (window.location.hostname === 'rencontreauthentique.org' || 
+        window.location.hostname === 'www.rencontreauthentique.org') {
       console.log('🌍 Production détectée, utilisation du backend Hostinger');
       return 'https://green-alpaca-449310.hostingersite.com/api';
     }
