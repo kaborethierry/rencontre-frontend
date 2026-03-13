@@ -4,9 +4,8 @@
 const API_URL = (() => {
   // Vérifier si on est dans le navigateur
   if (typeof window !== 'undefined') {
-    // Si on est sur le domaine de production (avec ou sans www)
-    if (window.location.hostname === 'rencontreauthentique.org' || 
-        window.location.hostname === 'www.rencontreauthentique.org') {
+    // Production - forcer l'URL si le domaine contient rencontreauthentique.org
+    if (window.location.hostname.includes('rencontreauthentique.org')) {
       console.log('🌍 Production détectée, utilisation du backend Hostinger');
       return 'https://green-alpaca-449310.hostingersite.com/api';
     }
@@ -18,7 +17,15 @@ const API_URL = (() => {
   }
   
   // Fallback : utiliser la variable d'environnement
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl) {
+    console.log('🔧 Utilisation de NEXT_PUBLIC_API_URL:', envUrl);
+    return envUrl;
+  }
+  
+  // Dernier recours
+  console.log('⚠️ Aucune détection, fallback sur localhost');
+  return 'http://localhost:5000/api';
 })();
 
 console.log('🚀 API_URL finale utilisée:', API_URL);
