@@ -1,6 +1,6 @@
 // src/services/api.js
 
-// FORCER L'URL DE PRODUCTION
+// URL FORCÉE pour la production
 const API_URL = 'https://green-alpaca-449310.hostingersite.com/api';
 
 console.log('🚀 API_URL FORCÉE:', API_URL);
@@ -11,6 +11,7 @@ class ApiService {
     console.log('📡 ApiService initialisé avec baseURL:', this.baseURL);
   }
 
+  // ... le reste du code reste identique ...
   getToken() {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('token');

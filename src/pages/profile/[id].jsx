@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import styles from "./profile.module.css";  // ✅ Import du même CSS que profile.jsx
+import styles from "../profile.module.css";  // ✅ CORRIGÉ : remonte d'un dossier
 import api from "../../services/api";
 
 import MessageIcon from "@mui/icons-material/Message";
@@ -21,7 +21,7 @@ export default function PublicProfile({ user }) {
 
   const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
-      if (window.location.hostname === 'rencontreauthentique.org') {
+      if (window.location.hostname.includes('rencontreauthentique.org')) {
         return 'https://green-alpaca-449310.hostingersite.com';
       }
     }
@@ -94,7 +94,7 @@ export default function PublicProfile({ user }) {
           <div className={styles.photoWrapper}>
             <Image
               src={getImageUrl(profile.photo)}
-              alt={`Photo de ${profile.prenom}`}
+              alt={profile.prenom}
               width={200}
               height={200}
               className={`${styles.profileImage} ${!showPhoto ? styles.blur : ""}`}
@@ -102,16 +102,11 @@ export default function PublicProfile({ user }) {
               onError={() => setImageError(true)}
             />
           </div>
-          
-          <button 
-            className={styles.togglePhoto} 
-            onClick={() => setShowPhoto(!showPhoto)}
-          >
+          <button className={styles.togglePhoto} onClick={() => setShowPhoto(!showPhoto)}>
             {showPhoto ? <VisibilityOffIcon /> : <VisibilityIcon />}
             {showPhoto ? "Masquer" : "Afficher"} la photo
           </button>
         </div>
-
         <div className={styles.profileInfo}>
           <h3>{profile.prenom} {profile.nom}</h3>
           <p><strong>Âge :</strong> {profile.age} ans</p>
@@ -137,12 +132,14 @@ export default function PublicProfile({ user }) {
         {posts.length > 0 ? (
           posts.map(post => (
             <div key={post.id} className={styles.postCard}>
-              <p>{post.content}</p>
-              <small>{new Date(post.createdAt).toLocaleDateString('fr-FR')}</small>
+              <p className={styles.postContent}>{post.content}</p>
+              <small className={styles.postDate}>
+                {new Date(post.createdAt).toLocaleDateString('fr-FR')}
+              </small>
             </div>
           ))
         ) : (
-          <p>Aucune publication</p>
+          <p className={styles.noPosts}>Aucune publication</p>
         )}
       </div>
     </div>
