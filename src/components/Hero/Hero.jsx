@@ -22,11 +22,13 @@ export default function Hero() {
       };
       setHearts(prev => [...prev, heart]);
 
+      // Supprimer les coeurs après animation
       setTimeout(() => {
         setHearts(prev => prev.filter(h => h.id !== heart.id));
       }, heart.duration * 1000);
     };
 
+    // Créer des coeurs toutes les 300ms
     const interval = setInterval(createHeart, 300);
 
     return () => clearInterval(interval);
@@ -39,14 +41,6 @@ export default function Hero() {
       
       {/* Overlay */}
       <div className={styles.heroOverlay}></div>
-
-      {/* Message défilant de droite à gauche (comme un serpent) */}
-      <div className={styles.scrollingMessageContainer}>
-        <div className={styles.scrollingMessage}>
-          <span>🌟 Plateforme numéro 1 au Burkina Faso pour des rencontres intégres 🌟</span>
-          <span>🌟 Plateforme numéro 1 au Burkina Faso pour des rencontres intégres 🌟</span>
-        </div>
-      </div>
 
       {/* Coeurs animés */}
       <div className={styles.heartsContainer}>
