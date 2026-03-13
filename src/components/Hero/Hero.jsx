@@ -6,9 +6,18 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 
 export default function Hero() {
   const [hearts, setHearts] = useState([]);
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  const messages = [
+    "🌟 Plateforme numéro 1 au Burkina Faso",
+    "💖 Rencontres authentiques et discrètes",
+    "🤝 Des milliers de célibataires vous attendent",
+    "✨ Trouvez l'amour en toute simplicité",
+    "💕 Rejoignez la communauté"
+  ];
 
   useEffect(() => {
-    // Créer des coeurs animés
+    // Animation des coeurs
     const createHeart = () => {
       const heart = {
         id: Date.now() + Math.random(),
@@ -22,16 +31,22 @@ export default function Hero() {
       };
       setHearts(prev => [...prev, heart]);
 
-      // Supprimer les coeurs après animation
       setTimeout(() => {
         setHearts(prev => prev.filter(h => h.id !== heart.id));
       }, heart.duration * 1000);
     };
 
-    // Créer des coeurs toutes les 300ms
     const interval = setInterval(createHeart, 300);
 
-    return () => clearInterval(interval);
+    // Message défilant
+    const messageInterval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % messages.length);
+    }, 4000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(messageInterval);
+    };
   }, []);
 
   return (
@@ -41,6 +56,15 @@ export default function Hero() {
       
       {/* Overlay */}
       <div className={styles.heroOverlay}></div>
+
+      {/* Message défilant */}
+      <div className={styles.scrollingMessage}>
+        <div className={styles.messageContent}>
+          <span className={styles.messageText} key={messageIndex}>
+            {messages[messageIndex]}
+          </span>
+        </div>
+      </div>
 
       {/* Coeurs animés */}
       <div className={styles.heartsContainer}>
