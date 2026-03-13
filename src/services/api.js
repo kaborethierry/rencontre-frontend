@@ -1,34 +1,9 @@
 // src/services/api.js
 
-// Déterminer l'URL de l'API en fonction de l'environnement
-const API_URL = (() => {
-  // Vérifier si on est dans le navigateur
-  if (typeof window !== 'undefined') {
-    // Production - forcer l'URL si le domaine contient rencontreauthentique.org
-    if (window.location.hostname.includes('rencontreauthentique.org')) {
-      console.log('🌍 Production détectée, utilisation du backend Hostinger');
-      return 'https://green-alpaca-449310.hostingersite.com/api';
-    }
-    // Si on est en développement local
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log('💻 Développement local détecté');
-      return 'http://localhost:5000/api';
-    }
-  }
-  
-  // Fallback : utiliser la variable d'environnement
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (envUrl) {
-    console.log('🔧 Utilisation de NEXT_PUBLIC_API_URL:', envUrl);
-    return envUrl;
-  }
-  
-  // Dernier recours
-  console.log('⚠️ Aucune détection, fallback sur localhost');
-  return 'http://localhost:5000/api';
-})();
+// FORCER L'URL DE PRODUCTION
+const API_URL = 'https://green-alpaca-449310.hostingersite.com/api';
 
-console.log('🚀 API_URL finale utilisée:', API_URL);
+console.log('🚀 API_URL FORCÉE:', API_URL);
 
 class ApiService {
   constructor() {
@@ -36,10 +11,6 @@ class ApiService {
     console.log('📡 ApiService initialisé avec baseURL:', this.baseURL);
   }
 
-  /**
-   * Récupère le token JWT depuis le localStorage
-   * @returns {string|null} Le token ou null si non trouvé
-   */
   getToken() {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('token');
@@ -47,10 +18,6 @@ class ApiService {
     return null;
   }
 
-  /**
-   * Récupère l'utilisateur connecté depuis le localStorage
-   * @returns {Object|null} L'utilisateur ou null si non trouvé
-   */
   getUser() {
     if (typeof window !== 'undefined') {
       const user = localStorage.getItem('user');
@@ -59,10 +26,6 @@ class ApiService {
     return null;
   }
 
-  /**
-   * Génère les en-têtes HTTP pour les requêtes
-   * @returns {Object} Les en-têtes avec Content-Type et Authorization si token présent
-   */
   getHeaders() {
     const headers = {
       'Content-Type': 'application/json',
@@ -76,12 +39,6 @@ class ApiService {
     return headers;
   }
 
-  /**
-   * Traite la réponse de l'API
-   * @param {Response} response - La réponse fetch
-   * @returns {Promise<any>} Les données parsées
-   * @throws {Error} Si la réponse n'est pas OK
-   */
   async handleResponse(response) {
     const contentType = response.headers.get('content-type');
     let data;
@@ -103,7 +60,6 @@ class ApiService {
     }
     
     if (!response.ok) {
-      // Gestion spéciale pour 401 (non autorisé)
       if (response.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -124,11 +80,6 @@ class ApiService {
     return data;
   }
 
-  /**
-   * Requête GET
-   * @param {string} endpoint - L'endpoint à appeler
-   * @returns {Promise<any>} Les données de la réponse
-   */
   async get(endpoint) {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       method: 'GET',
@@ -137,12 +88,6 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  /**
-   * Requête POST
-   * @param {string} endpoint - L'endpoint à appeler
-   * @param {any} data - Les données à envoyer
-   * @returns {Promise<any>} Les données de la réponse
-   */
   async post(endpoint, data) {
     const isFormData = data instanceof FormData;
     const headers = isFormData ? {
@@ -157,12 +102,6 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  /**
-   * Requête PUT
-   * @param {string} endpoint - L'endpoint à appeler
-   * @param {any} data - Les données à envoyer
-   * @returns {Promise<any>} Les données de la réponse
-   */
   async put(endpoint, data) {
     const isFormData = data instanceof FormData;
     const headers = isFormData ? {
@@ -177,11 +116,6 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  /**
-   * Requête DELETE
-   * @param {string} endpoint - L'endpoint à appeler
-   * @returns {Promise<any>} Les données de la réponse
-   */
   async delete(endpoint) {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       method: 'DELETE',
@@ -191,6 +125,5 @@ class ApiService {
   }
 }
 
-// Créer et exporter une instance unique du service
 const apiService = new ApiService();
 export default apiService;
