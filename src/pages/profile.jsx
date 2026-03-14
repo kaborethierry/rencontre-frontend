@@ -28,6 +28,16 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
   const [success, setSuccess] = useState("");
   const [deletingAccount, setDeletingAccount] = useState(false);
 
+  // ✅ URL de base dynamique
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hostname === 'rencontreauthentique.org') {
+        return 'https://green-alpaca-449310.hostingersite.com';
+      }
+    }
+    return 'http://localhost:5000';
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -149,7 +159,6 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
     }
   };
 
-  // Fonction pour supprimer le compte
   const handleDeleteAccount = async () => {
     if (deletingAccount) return;
     
@@ -170,19 +179,14 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
     setError("");
     
     try {
-      // Appel API pour supprimer le compte
       await api.delete('/users/profile');
       
-      // Nettoyer le localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      // Déconnecter l'utilisateur
       if (setPropUser) setPropUser(null);
       
       alert("✅ Votre compte a été supprimé avec succès.");
-      
-      // Rediriger vers la page d'accueil
       router.push("/");
       
     } catch (error) {
@@ -192,37 +196,36 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
     }
   };
 
-  // FONCTION CORRIGÉE POUR LES IMAGES - VERSION ULTIME
-  const getImageUrl = () => {
+  // ✅ FONCTION CORRIGÉE POUR LES IMAGES - VERSION ULTIME
+  const getImageUrl = (photo) => {
+    const baseUrl = getBaseUrl();
+    
     // 1. Prévisualisation (nouvelle photo)
     if (photoPreview) return photoPreview;
     
     // 2. Pas de photo
-    if (!user?.photo) return "/default-avatar.png";
+    if (!photo) return "/default-avatar.png";
     
     // 3. Afficher l'URL complète pour debug
-    console.log("📸 Photo originale:", user.photo);
+    console.log("📸 Photo originale:", photo);
     
-    // 4. Construction de l'URL avec différentes possibilités
-    const baseUrl = 'http://localhost:5000';
-    
-    // Si c'est déjà une URL complète
-    if (user.photo.startsWith('http')) {
-      return user.photo;
+    // 4. Si c'est déjà une URL complète (https://...)
+    if (photo.startsWith('http://') || photo.startsWith('https://')) {
+      return photo;
     }
     
-    // Si le chemin commence par /uploads
-    if (user.photo.startsWith('/uploads')) {
-      return `${baseUrl}${user.photo}`;
+    // 5. Si le chemin commence par /uploads
+    if (photo.startsWith('/uploads')) {
+      return `${baseUrl}${photo}`;
     }
     
-    // Si c'est juste le nom du fichier
-    if (!user.photo.includes('/')) {
-      return `${baseUrl}/uploads/profiles/${user.photo}`;
+    // 6. Si c'est juste le nom du fichier
+    if (!photo.includes('/')) {
+      return `${baseUrl}/uploads/profiles/${photo}`;
     }
     
-    // Fallback
-    return `${baseUrl}/uploads/profiles/${user.photo}`;
+    // 7. Fallback
+    return `${baseUrl}/uploads/profiles/${photo}`;
   };
 
   if (loading) {
@@ -240,13 +243,13 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
         <div className={styles.profilePhoto}>
           <div className={styles.photoWrapper}>
             <Image
-              src={getImageUrl()}
+              src={getImageUrl(user?.photo)}
               alt="photo de profil"
               width={200}
               height={200}
               className={`${styles.profileImage} ${!showPhoto ? styles.blur : ""}`}
               priority
-              unoptimized // Force le chargement sans optimisation
+              unoptimized
               onError={(e) => {
                 console.log("❌ Erreur chargement image:", e.target.src);
                 e.target.src = "/default-avatar.png";
@@ -420,8 +423,8 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
           <div key={post.id} className={styles.postCard}>
             <div className={styles.postHeader}>
               <Image 
-                src={getImageUrl()}
-                alt={user?.prenom}
+                src={getImageUrl(user?.photo)}
+                alt={user?.prenom || 'Avatar'}
                 width={50} 
                 height={50} 
                 className={styles.postUserPhoto}

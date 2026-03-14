@@ -30,10 +30,29 @@ export default function Chat() {
 
   const emojis = ["😊", "😂", "❤️", "😍", "👍", "🎉", "😢", "😡", "🤔", "👋", "💕", "😘", "🥰", "😁", "🤗", "🙏", "🔥", "✨", "🌟", "💫"];
 
-  // Fonction de compression d'image - UTILISER UN AUTRE NOM
-  const compressImageFile = (base64, maxSize = 500 * 1024) => { // 500KB max
+  // ✅ URL de base dynamique
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hostname === 'rencontreauthentique.org') {
+        return 'https://green-alpaca-449310.hostingersite.com';
+      }
+    }
+    return 'http://localhost:5000';
+  };
+
+  // ✅ Fonction corrigée pour les images
+  const getImageUrl = (photo) => {
+    const baseUrl = getBaseUrl();
+    
+    if (!photo) return "/default-avatar.png";
+    if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
+    if (photo.startsWith('/uploads')) return `${baseUrl}${photo}`;
+    return `${baseUrl}/uploads/profiles/${photo}`;
+  };
+
+  // Fonction de compression d'image
+  const compressImageFile = (base64, maxSize = 500 * 1024) => {
     return new Promise((resolve, reject) => {
-      // Utiliser Image du DOM, pas le composant Next.js
       const imgElement = document.createElement('img');
       imgElement.src = base64;
       imgElement.onload = () => {
@@ -42,7 +61,6 @@ export default function Chat() {
           let width = imgElement.width;
           let height = imgElement.height;
           
-          // Redimensionner si trop grande
           const maxDimension = 800;
           if (width > maxDimension || height > maxDimension) {
             if (width > height) {
@@ -59,7 +77,6 @@ export default function Chat() {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(imgElement, 0, 0, width, height);
           
-          // Compresser avec qualité variable
           let quality = 0.9;
           let compressed = canvas.toDataURL('image/jpeg', quality);
           
@@ -93,19 +110,15 @@ export default function Chat() {
       try {
         setLoading(true);
         
-        // Récupérer les infos de l'autre utilisateur
         if (userId) {
           const userRes = await api.get(`/users/${userId}`);
           setOtherUser(userRes);
         }
 
-        // Charger les messages
         await loadMessages();
 
-        // Connecter socket
         socketService.connect();
         
-        // Écouter les nouveaux messages
         socketService.onNewMessage((message) => {
           setMessages(prev => [...prev, message]);
           scrollToBottom();
@@ -192,7 +205,6 @@ export default function Chat() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         try {
-          // Compresser l'image avant envoi - utiliser le nouveau nom
           const compressedImage = await compressImageFile(reader.result);
           
           socketService.sendMessage({
@@ -224,7 +236,6 @@ export default function Chat() {
       handleSendMessage();
     }
     
-    // Indiquer que l'utilisateur est en train d'écrire
     if (otherUser) {
       socketService.sendTyping(parseInt(userId), true);
       
@@ -265,13 +276,6 @@ export default function Chat() {
     return date.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getImageUrl = (photo) => {
-    if (!photo) return "/default-avatar.png";
-    if (photo.startsWith('http')) return photo;
-    if (photo.startsWith('/uploads')) return `http://localhost:5000${photo}`;
-    return `http://localhost:5000/uploads/${photo}`;
-  };
-
   if (loading) {
     return <div className={styles.loading}>Chargement de la conversation...</div>;
   }
@@ -295,6 +299,7 @@ export default function Chat() {
             height={45}
             className={styles.contactPhoto}
             unoptimized
+            onError={(e) => e.target.src = "/default-avatar.png"}
           />
           <div className={styles.contactInfo}>
             <h3>{otherUser.prenom} {otherUser.nom}</h3>
@@ -346,6 +351,7 @@ export default function Chat() {
                     height={30}
                     className={styles.messageAvatar}
                     unoptimized
+                    onError={(e) => e.target.src = "/default-avatar.png"}
                   />
                 )}
                 

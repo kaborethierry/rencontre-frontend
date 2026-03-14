@@ -1,0 +1,14 @@
+# public/robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://rencontreauthentique.org/sitemap.xml
+
+# Désactiver l'indexation de certaines pages admin
+Disallow: /admin
+Disallow: /adminlogin
+Disallow: /adminregister
+Disallow: /api/*
+Disallow: /messages/*
+Disallow: /profile/edit

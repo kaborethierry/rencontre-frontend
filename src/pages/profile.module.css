@@ -764,3 +764,75 @@
   cursor: not-allowed;
   opacity: 0.7;
 }
+
+/* Styles pour le profil public (ajouter à la fin du fichier) */
+
+.messageBtn {
+  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.messageBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+}
+
+.reportBtn {
+  background: #ff4444;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.reportBtn:hover:not(:disabled) {
+  background: #cc0000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,68,68,0.3);
+}
+
+.postsSection {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(255,105,180,0.15);
+}
+
+.postsSection h3 {
+  color: #FF69B4;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.error {
+  text-align: center;
+  color: #c62828;
+  padding: 50px;
+  font-size: 1.2em;
+  background: white;
+  border-radius: 15px;
+  max-width: 600px;
+  margin: 40px auto;
+  box-shadow: 0 4px 15px rgba(255,105,180,0.1);
+}

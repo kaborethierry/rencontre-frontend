@@ -22,6 +22,26 @@ export default function Messages() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState('default');
 
+  // ✅ URL de base dynamique
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hostname === 'rencontreauthentique.org') {
+        return 'https://green-alpaca-449310.hostingersite.com';
+      }
+    }
+    return 'http://localhost:5000';
+  };
+
+  // ✅ Fonction corrigée pour les images
+  const getImageUrl = (photo) => {
+    const baseUrl = getBaseUrl();
+    
+    if (!photo) return "/default-avatar.png";
+    if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
+    if (photo.startsWith('/uploads')) return `${baseUrl}${photo}`;
+    return `${baseUrl}/uploads/profiles/${photo}`;
+  };
+
   // Vérifier les permissions de notification
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -216,13 +236,6 @@ export default function Messages() {
     }
   };
 
-  const getImageUrl = (photo) => {
-    if (!photo) return "/default-avatar.png";
-    if (photo.startsWith('http')) return photo;
-    if (photo.startsWith('/uploads')) return `http://localhost:5000${photo}`;
-    return `http://localhost:5000/uploads/${photo}`;
-  };
-
   if (loading) {
     return <div className={styles.loading}>Chargement...</div>;
   }
@@ -286,6 +299,7 @@ export default function Messages() {
                     height={60}
                     className={styles.avatar}
                     unoptimized
+                    onError={(e) => e.target.src = "/default-avatar.png"}
                   />
                   {isUnread && <span className={styles.unreadDot} />}
                 </div>

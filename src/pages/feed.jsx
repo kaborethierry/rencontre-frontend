@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,24 +12,169 @@ import MessageIcon from "@mui/icons-material/Message";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import SearchIcon from "@mui/icons-material/Search";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import CloseIcon from "@mui/icons-material/Close";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import RefreshIcon from "@mui/icons-material/Refresh";
+
+// Composant mémorisé pour chaque post (évite les re-rendus inutiles)
+const PostCard = memo(({ post, currentUser, onLike, onMessage, onComment, onDeleteComment }) => {
+  const [liked, setLiked] = useState(post.likesUsers?.includes(currentUser?.id) || false);
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [comments, setComments] = useState(post.comments || []);
+  const [newComment, setNewComment] = useState("");
+  const [showComments, setShowComments] = useState(false);
+
+  const handleLike = async () => {
+    try {
+      const response = await api.post(`/likes/${post.id}/toggle`, {});
+      setLiked(!liked);
+      setLikesCount(response.count);
+    } catch (error) {
+      console.error("Erreur like:", error);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    try {
+      const response = await api.post(`/comments/${post.id}`, { content: newComment });
+      setComments([...comments, response]);
+      setNewComment("");
+    } catch (error) {
+      console.error("Erreur commentaire:", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm("Supprimer ce commentaire ?")) return;
+    try {
+      await api.delete(`/comments/${commentId}`);
+      setComments(comments.filter(c => c.id !== commentId));
+    } catch (error) {
+      console.error("Erreur suppression commentaire:", error);
+    }
+  };
+
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hostname.includes('rencontreauthentique.org')) {
+        return 'https://green-alpaca-449310.hostingersite.com';
+      }
+    }
+    return 'http://localhost:5000';
+  };
+
+  const getImageUrl = (photo) => {
+    const baseUrl = getBaseUrl();
+    if (!photo) return "/default-avatar.png";
+    if (photo.startsWith('http')) return photo;
+    return `${baseUrl}${photo}`;
+  };
+
+  const isOwnPost = currentUser && post.userId === currentUser.id;
+
+  return (
+    <div className={`${styles.postCard} ${isOwnPost ? styles.ownPost : ''}`}>
+      <div className={styles.postHeader}>
+        <Link href={`/profile/${post.userId}`}>
+          <Image 
+            src={getImageUrl(post.photo)}
+            alt={post.prenom}
+            width={50}
+            height={50}
+            className={styles.postUserPhoto}
+            unoptimized
+          />
+        </Link>
+        <div className={styles.postHeaderInfo}>
+          <Link href={`/profile/${post.userId}`} className={styles.profileLink}>
+            <strong>{post.prenom} {post.nom}</strong>
+            {isOwnPost && <span className={styles.youBadge}>(vous)</span>}
+          </Link>
+          <p className={styles.postInfo}>
+            {post.age} ans | {post.ville} | {post.religion}
+          </p>
+          <p className={styles.postDate}>
+            {new Date(post.createdAt).toLocaleDateString('fr-FR')}
+          </p>
+        </div>
+      </div>
+
+      <p className={styles.postContent}>{post.content}</p>
+
+      <div className={styles.postStats}>
+        <span>{likesCount} j'aime</span>
+        <button className={styles.commentsToggle} onClick={() => setShowComments(!showComments)}>
+          {comments.length} commentaires
+        </button>
+      </div>
+
+      <div className={styles.postActions}>
+        <button className={styles.likeBtn} onClick={handleLike}>
+          {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+          {likesCount}
+        </button>
+        <button className={styles.commentBtn} onClick={() => setShowComments(!showComments)}>
+          <CommentIcon /> Commenter
+        </button>
+        <button className={styles.messageBtn} onClick={() => onMessage(post.userId)} disabled={isOwnPost}>
+          <MessageIcon /> Message
+        </button>
+      </div>
+
+      {showComments && (
+        <div className={styles.commentsSection}>
+          <h4>Commentaires</h4>
+          {comments.map(comment => {
+            const isOwnComment = currentUser && comment.userId === currentUser.id;
+            return (
+              <div key={comment.id} className={`${styles.commentItem} ${isOwnComment ? styles.ownComment : ''}`}>
+                <Image 
+                  src={getImageUrl(comment.photo)}
+                  alt={comment.prenom}
+                  width={30}
+                  height={30}
+                  className={styles.commentUserPhoto}
+                  unoptimized
+                />
+                <div className={styles.commentContent}>
+                  <strong>{isOwnComment ? "Vous" : `${comment.prenom} ${comment.nom}`}</strong>
+                  <p>{comment.content}</p>
+                  <small>{new Date(comment.createdAt).toLocaleDateString('fr-FR')}</small>
+                </div>
+                {isOwnComment && (
+                  <button className={styles.deleteCommentBtn} onClick={() => handleDeleteComment(comment.id)}>
+                    <DeleteIcon fontSize="small" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+          {currentUser && (
+            <div className={styles.addComment}>
+              <input
+                type="text"
+                placeholder="Écrire un commentaire..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleAddComment()}
+              />
+              <button onClick={handleAddComment} disabled={!newComment.trim()}>
+                <SendIcon />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
+PostCard.displayName = 'PostCard';
 
 export default function Feed({ user }) {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [currentUser, setCurrentUser] = useState(user);
-  const [likes, setLikes] = useState({});
-  const [comments, setComments] = useState({});
-  const [newComment, setNewComment] = useState({});
-  const [showComments, setShowComments] = useState({});
-  const [messageIndex, setMessageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [usersMap, setUsersMap] = useState({});
+  const [messageIndex, setMessageIndex] = useState(0);
 
   const messages = [
     "💕 Rencontrez votre âme sœur en toute discrétion",
@@ -39,53 +184,13 @@ export default function Feed({ user }) {
     "🌟 Trouvez la personne qui vous correspond vraiment"
   ];
 
+  // Chargement optimisé des posts
   useEffect(() => {
-    setCurrentUser(user);
-  }, [user]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchPosts = async () => {
       try {
-        // 1. Récupérer tous les posts
-        const postsRes = await api.get('/posts');
-        setPosts(postsRes || []);
-
-        // 2. Récupérer tous les utilisateurs
-        const usersRes = await api.get('/users/search?limit=100');
-        setUsers(usersRes || []);
-        
-        // Créer une map pour un accès plus rapide
-        const map = {};
-        usersRes.forEach(u => {
-          map[u.id] = u;
-        });
-        setUsersMap(map);
-
-        // 3. Récupérer les likes pour chaque post
-        const likesMap = {};
-        for (const post of postsRes) {
-          try {
-            const likeRes = await api.get(`/likes/${post.id}`);
-            likesMap[post.id] = likeRes;
-          } catch (e) {
-            likesMap[post.id] = { count: 0, users: [] };
-          }
-        }
-        setLikes(likesMap);
-
-        // 4. Récupérer les commentaires pour chaque post
-        const commentsMap = {};
-        for (const post of postsRes) {
-          try {
-            const commentRes = await api.get(`/comments/${post.id}`);
-            commentsMap[post.id] = commentRes || [];
-          } catch (e) {
-            commentsMap[post.id] = [];
-          }
-        }
-        setComments(commentsMap);
-        
+        setLoading(true);
+        const data = await api.get('/posts/approved');
+        setPosts(data || []);
       } catch (error) {
         console.error("Erreur chargement feed:", error);
       } finally {
@@ -93,7 +198,7 @@ export default function Feed({ user }) {
       }
     };
 
-    fetchData();
+    fetchPosts();
 
     const interval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % messages.length);
@@ -102,121 +207,13 @@ export default function Feed({ user }) {
     return () => clearInterval(interval);
   }, []);
 
-  const handleLike = async (postId) => {
-    if (!currentUser) {
+  const handleMessage = (userId) => {
+    if (!user) {
       alert("Veuillez vous connecter");
       router.push("/login");
       return;
     }
-
-    try {
-      const response = await api.post(`/likes/${postId}/toggle`, {});
-      
-      setLikes(prev => ({
-        ...prev,
-        [postId]: response
-      }));
-    } catch (error) {
-      console.error("Erreur like:", error);
-    }
-  };
-
-  const handleAddComment = async (postId) => {
-    if (!currentUser) {
-      alert("Veuillez vous connecter");
-      router.push("/login");
-      return;
-    }
-
-    if (!newComment[postId]?.trim()) return;
-
-    try {
-      const response = await api.post(`/comments/${postId}`, {
-        content: newComment[postId]
-      });
-
-      setComments(prev => ({
-        ...prev,
-        [postId]: [...(prev[postId] || []), response]
-      }));
-
-      setNewComment(prev => ({ ...prev, [postId]: "" }));
-    } catch (error) {
-      console.error("Erreur commentaire:", error);
-    }
-  };
-
-  const handleDeleteComment = async (postId, commentId) => {
-    if (!currentUser || !confirm("Supprimer ce commentaire ?")) return;
-
-    try {
-      await api.delete(`/comments/${commentId}`);
-
-      setComments(prev => ({
-        ...prev,
-        [postId]: prev[postId].filter(c => c.id !== commentId)
-      }));
-    } catch (error) {
-      console.error("Erreur suppression commentaire:", error);
-    }
-  };
-
-  const handleMessage = (otherUser) => {
-    if (!currentUser) {
-      alert("Veuillez vous connecter");
-      router.push("/login");
-      return;
-    }
-    router.push(`/chat?userId=${otherUser.id}`);
-  };
-
-  const handleViewProfile = (userId) => {
-    router.push(`/profile/${userId}`);
-  };
-
-  const getUserById = (userId) => {
-    // Chercher d'abord dans la map
-    if (usersMap[userId]) return usersMap[userId];
-    
-    // Sinon chercher dans le tableau
-    const found = users.find(u => u.id === userId);
-    if (found) return found;
-    
-    // Si toujours pas trouvé, retourner un objet avec les infos du post
-    const post = posts.find(p => p.userId === userId);
-    if (post) {
-      return {
-        id: userId,
-        prenom: post.userName?.split(' ')[0] || 'Utilisateur',
-        nom: post.userName?.split(' ')[1] || '',
-        age: post.age,
-        ville: post.ville,
-        religion: post.religion,
-        photo: post.userPhoto
-      };
-    }
-    
-    return null;
-  };
-
-  const getImageUrl = (photo) => {
-    if (!photo) return "/default-avatar.png";
-    if (photo.startsWith('http')) return photo;
-    if (photo.startsWith('/uploads')) return `http://localhost:5000${photo}`;
-    return `http://localhost:5000/uploads/${photo}`;
-  };
-
-  // Fonction pour afficher le nom avec "Vous" si c'est l'utilisateur connecté
-  const displayName = (postUser) => {
-    if (!postUser) return "Utilisateur inconnu";
-    
-    if (currentUser && postUser.id === currentUser.id) {
-      return "Vous";
-    }
-    
-    const prenom = postUser.prenom || "Prénom";
-    const nom = postUser.nom || "Nom";
-    return `${prenom} ${nom}`.trim();
+    router.push(`/chat?userId=${userId}`);
   };
 
   if (loading) {
@@ -234,154 +231,31 @@ export default function Feed({ user }) {
 
       <h2 className={styles.feedTitle}>Fil d'actualité</h2>
 
-      {!currentUser ? (
+      {!user ? (
         <div className={styles.loginPrompt}>
           <p className={styles.welcomeTitle}>👋 Bienvenue sur RencontreAuthentique !</p>
           <p className={styles.welcomeMessage}>
-            Découvrez les profils et publications des membres. Pour interagir 
-            (liker, commenter, envoyer des messages privés), vous devez d'abord 
-            créer un compte ou vous connecter.
+            Découvrez les profils et publications des membres.
           </p>
           <div className={styles.promptButtons}>
             <Link href="/login" className={styles.loginButton}>Se connecter</Link>
-            <Link href="/register" className={styles.registerButton}>Créer un compte</Link>
+            <Link href="/register" className={styles.registerButton}>S'inscrire</Link>
           </div>
         </div>
       ) : (
         <div className={styles.connectedMessage}>
-          <p>✅ Connecté en tant que {currentUser.prenom || ''} {currentUser.nom || ''}</p>
+          <p>✅ Connecté en tant que {user.prenom}</p>
         </div>
       )}
 
-      {posts.map((post) => {
-        const postUser = getUserById(post.userId);
-        const postLikes = likes[post.id] || { count: 0, users: [] };
-        const postComments = comments[post.id] || [];
-        const isOwnPost = currentUser && postUser?.id === currentUser.id;
-
-        if (!postUser) return null;
-
-        return (
-          <div key={post.id} className={`${styles.postCard} ${isOwnPost ? styles.ownPost : ''}`}>
-            <div className={styles.postHeader}>
-              <Image 
-                src={getImageUrl(postUser.photo)}
-                alt={postUser.prenom || "utilisateur"}
-                width={50}
-                height={50}
-                className={styles.postUserPhoto}
-                unoptimized
-                onError={(e) => e.target.src = "/default-avatar.png"}
-              />
-              <div className={styles.postHeaderInfo}>
-                <strong>
-                  {displayName(postUser)}
-                  {isOwnPost && <span className={styles.youBadge}>(vous)</span>}
-                </strong>
-                <p className={styles.postInfo}>
-                  Âge : {postUser.age || post.age || '?'} ans | {postUser.ville || post.ville || '?'} | {postUser.religion || post.religion || '?'}
-                </p>
-                <p className={styles.postDate}>
-                  {new Date(post.createdAt).toLocaleDateString('fr-FR')}
-                </p>
-              </div>
-            </div>
-
-            <p className={styles.postContent}>{post.content}</p>
-
-            <div className={styles.postStats}>
-              <span>{postLikes.count || 0} j'aime</span>
-              <button 
-                className={styles.commentsToggle} 
-                onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
-              >
-                {postComments.length || 0} commentaires
-              </button>
-            </div>
-
-            <div className={styles.postActions}>
-              <button 
-                className={styles.likeBtn} 
-                onClick={() => handleLike(post.id)} 
-                disabled={!currentUser}
-              >
-                {postLikes.users?.includes(currentUser?.id) ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                {postLikes.count || 0}
-              </button>
-              <button 
-                className={styles.commentBtn} 
-                onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
-                disabled={!currentUser}
-              >
-                <CommentIcon /> Commenter
-              </button>
-              <button 
-                className={styles.messageBtn} 
-                onClick={() => handleMessage(postUser)} 
-                disabled={!currentUser || isOwnPost}
-              >
-                <MessageIcon /> Message privé
-              </button>
-            </div>
-
-            {showComments[post.id] && (
-              <div className={styles.commentsSection}>
-                <h4>Commentaires</h4>
-                {postComments.map(comment => {
-                  const isOwnComment = currentUser && comment.userId === currentUser.id;
-                  return (
-                    <div key={comment.id} className={`${styles.commentItem} ${isOwnComment ? styles.ownComment : ''}`}>
-                      <Image 
-                        src={getImageUrl(comment.photo)}
-                        alt={comment.prenom || "utilisateur"}
-                        width={30}
-                        height={30}
-                        className={styles.commentUserPhoto}
-                        unoptimized
-                        onError={(e) => e.target.src = "/default-avatar.png"}
-                      />
-                      <div className={styles.commentContent}>
-                        <strong>
-                          {isOwnComment ? "Vous" : `${comment.prenom || ''} ${comment.nom || ''}`}
-                          {isOwnComment && <span className={styles.youBadge}>(vous)</span>}
-                        </strong>
-                        <p>{comment.content}</p>
-                        <small>{new Date(comment.createdAt).toLocaleDateString('fr-FR')}</small>
-                      </div>
-                      {isOwnComment && (
-                        <button 
-                          className={styles.deleteCommentBtn}
-                          onClick={() => handleDeleteComment(post.id, comment.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {currentUser && (
-                  <div className={styles.addComment}>
-                    <input
-                      type="text"
-                      placeholder="Écrire un commentaire..."
-                      value={newComment[post.id] || ""}
-                      onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
-                      onKeyPress={(e) => e.key === "Enter" && handleAddComment(post.id)}
-                    />
-                    <button 
-                      onClick={() => handleAddComment(post.id)} 
-                      disabled={!newComment[post.id]?.trim()}
-                    >
-                      <SendIcon />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {posts.map(post => (
+        <PostCard
+          key={post.id}
+          post={post}
+          currentUser={user}
+          onMessage={handleMessage}
+        />
+      ))}
 
       {posts.length === 0 && (
         <div className={styles.noPosts}>
