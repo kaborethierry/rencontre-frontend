@@ -1,4 +1,3 @@
-// public/sw.js
 self.addEventListener('push', function(event) {
     const data = event.data.json();
     
@@ -8,16 +7,21 @@ self.addEventListener('push', function(event) {
       badge: '/favicon.ico',
       vibrate: [200, 100, 200],
       data: {
-        url: data.url || '/admin'
+        url: data.url || '/admin',
+        postId: data.postId
       },
       actions: [
         {
-          action: 'open',
-          title: 'Voir la publication'
+          action: 'approve',
+          title: '✅ Approuver'
+        },
+        {
+          action: 'view',
+          title: '👁️ Voir'
         },
         {
           action: 'close',
-          title: 'Fermer'
+          title: '❌ Fermer'
         }
       ]
     };
@@ -32,7 +36,14 @@ self.addEventListener('push', function(event) {
   
     if (event.action === 'close') return;
   
-    event.waitUntil(
-      clients.openWindow(event.notification.data.url)
-    );
+    if (event.action === 'approve') {
+      // Ouvrir la page d'admin avec le post à approuver
+      event.waitUntil(
+        clients.openWindow('/admin?tab=posts&approve=' + event.notification.data.postId)
+      );
+    } else {
+      event.waitUntil(
+        clients.openWindow(event.notification.data.url)
+      );
+    }
   });

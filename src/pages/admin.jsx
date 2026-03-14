@@ -74,79 +74,71 @@ export default function Admin({ user }) {
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
-  // ✅ Demander la permission pour les notifications
-  useEffect(() => {
-    if ('Notification' in window) {
-      setPermission(Notification.permission);
-      if (Notification.permission === 'default') {
-        Notification.requestPermission().then(perm => setPermission(perm));
-      }
-    }
-
-    // Enregistrer le service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker enregistré'))
-        .catch(err => console.error('Erreur SW:', err));
-    }
-  }, []);
-
-  // ✅ Fonction pour jouer le son et afficher la notification
-  const showNotification = (title, body, url = '/admin') => {
-    // Son
-    if (soundEnabled) {
-      try {
-        const audio = new Audio('/notification.mp3');
-        audio.play().catch(e => console.log("Son bloqué"));
-      } catch (error) {}
-    }
-
-    // Notification push
-    if ('Notification' in window && Notification.permission === 'granted') {
-      // Notification native
-      const notification = new Notification(title, {
-        body: body,
-        icon: '/logo192.png',
-        badge: '/favicon.ico',
-        vibrate: [200, 100, 200],
-        tag: 'new-post',
-        renotify: true,
-        requireInteraction: true,
-        silent: !soundEnabled
-      });
-
-      notification.onclick = () => {
-        window.focus();
-        router.push(url);
-        notification.close();
-      };
-    }
+  // ✅ Fonction pour jouer le son
+  const playNotificationSound = () => {
+    if (!soundEnabled) return;
+    try {
+      const audio = new Audio('/notification.mp3');
+      audio.play().catch(e => console.log("Son bloqué"));
+    } catch (error) {}
   };
 
-  // ✅ Charger les notifications et posts en attente
-  const loadPendingData = async () => {
+  // ✅ S'abonner aux notifications push
+  useEffect(() => {
+    const subscribeToPush = async () => {
+      if ('Notification' in window && 'serviceWorker' in navigator) {
+        try {
+          const permission = await Notification.requestPermission();
+          setPermission(permission);
+          
+          if (permission === 'granted') {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: 'BPvQSeODcyM1HeCsscthJxdqTVZVZvuRcTz9r89tqJfvbN1AN2S2UaLgxjF8eET__Plbx4b18qUGH-APE3xN92o'
+            });
+            
+            await api.post('/notifications/subscribe', { 
+              subscription: subscription.toJSON() 
+            });
+          }
+        } catch (error) {
+          console.error("Erreur subscription:", error);
+        }
+      }
+    };
+    
+    subscribeToPush();
+  }, []);
+
+  // ✅ Charger les posts en attente en temps réel
+  const loadPendingPosts = async () => {
     try {
-      // Récupérer les notifications non lues
-      const notifsRes = await api.get('/notifications/unread').catch(() => []);
-      const newNotifs = notifsRes || [];
+      const pendingRes = await api.get('/admin/posts/pending');
       
-      // Récupérer les posts en attente
-      const pendingRes = await api.get('/admin/posts/pending').catch(() => []);
-      const newPending = pendingRes || [];
-      
-      // S'il y a de nouvelles notifications, alerter l'admin
-      if (newPending.length > pendingPosts.length || newNotifs.length > notifications.length) {
-        showNotification(
-          '📝 Nouvelle publication en attente',
-          `${newPending[0]?.prenom} ${newPending[0]?.nom} a publié un message`,
-          '/admin?tab=posts'
-        );
+      // Si de nouveaux posts arrivent
+      if (pendingRes.length > pendingPosts.length) {
+        playNotificationSound();
+        
+        // Afficher une notification push
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('📝 Nouvelle publication en attente', {
+            body: `${pendingRes[0]?.prenom} ${pendingRes[0]?.nom} a publié un message`,
+            icon: '/logo192.png',
+            badge: '/favicon.ico',
+            vibrate: [200, 100, 200],
+            requireInteraction: true,
+            data: {
+              url: '/admin?tab=posts',
+              postId: pendingRes[0]?.id
+            }
+          });
+        }
       }
       
-      setPendingPosts(newPending);
-      setNotifications(newNotifs);
+      setPendingPosts(pendingRes);
     } catch (error) {
-      console.error("Erreur chargement notifications:", error);
+      console.error("Erreur chargement posts:", error);
     }
   };
 
@@ -166,8 +158,8 @@ export default function Admin({ user }) {
 
     loadDashboardData();
     
-    // Vérifier les nouvelles publications toutes les 15 secondes
-    const interval = setInterval(loadPendingData, 15000);
+    // WebSocket en temps réel (toutes les 5 secondes)
+    const interval = setInterval(loadPendingPosts, 5000);
     
     return () => clearInterval(interval);
   }, [user]);
@@ -200,8 +192,7 @@ export default function Admin({ user }) {
       }).length;
       setOnlineUsers(online);
 
-      // Charger les posts en attente
-      await loadPendingData();
+      await loadPendingPosts();
       
     } catch (error) {
       console.error("Erreur chargement admin:", error);
@@ -250,7 +241,6 @@ export default function Admin({ user }) {
     if (!confirm("Supprimer cette publication ?")) return;
     try {
       await api.delete(`/admin/posts/${postId}`);
-      setPosts(posts.filter(p => p.id !== postId));
       setPendingPosts(pendingPosts.filter(p => p.id !== postId));
     } catch (error) {
       console.error("Erreur suppression post:", error);
@@ -261,13 +251,7 @@ export default function Admin({ user }) {
     try {
       await api.put(`/admin/posts/${postId}/approve`);
       setPendingPosts(pendingPosts.filter(p => p.id !== postId));
-      // Son de confirmation
-      if (soundEnabled) {
-        try {
-          const audio = new Audio('/notification.mp3');
-          audio.play().catch(e => {});
-        } catch (error) {}
-      }
+      playNotificationSound();
     } catch (error) {
       console.error("Erreur approbation:", error);
     }
@@ -310,7 +294,7 @@ export default function Admin({ user }) {
     u.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPending = pendingPosts.length + notifications.length;
+  const totalPending = pendingPosts.length;
 
   if (loading) {
     return <div className={styles.loading}>Chargement du portail admin...</div>;
@@ -337,7 +321,7 @@ export default function Admin({ user }) {
                 <span>Administrateur</span>
               </div>
               <button 
-                className={styles.notificationBtn}
+                className={`${styles.notificationBtn} ${totalPending > 0 ? styles.hasNotification : ''}`}
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 title={soundEnabled ? "Son activé" : "Son désactivé"}
               >
@@ -375,7 +359,7 @@ export default function Admin({ user }) {
             onClick={() => setActiveTab('posts')}
           >
             <PostAddIcon /> Publications
-            {pendingPosts.length > 0 && <span className={styles.badge}>{pendingPosts.length}</span>}
+            {totalPending > 0 && <span className={styles.badge}>{totalPending}</span>}
           </button>
           <button 
             className={`${styles.sidebarItem} ${activeTab === 'reports' ? styles.active : ''}`}
