@@ -12,6 +12,8 @@ import SendIcon from "@mui/icons-material/Send";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export default function Profile({ user: propUser, setUser: setPropUser }) {
   const router = useRouter();
@@ -27,15 +29,25 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [postMessage, setPostMessage] = useState("");
 
   // ✅ URL de base dynamique
   const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
-      if (window.location.hostname === 'rencontreauthentique.org') {
+      if (window.location.hostname.includes('rencontreauthentique.org')) {
         return 'https://green-alpaca-449310.hostingersite.com';
       }
     }
     return 'http://localhost:5000';
+  };
+
+  const getImageUrl = (photo) => {
+    const baseUrl = getBaseUrl();
+    if (photoPreview) return photoPreview;
+    if (!photo) return "/default-avatar.png";
+    if (photo.startsWith('http')) return photo;
+    if (photo.startsWith('/uploads')) return `${baseUrl}${photo}`;
+    return `${baseUrl}/uploads/profiles/${photo}`;
   };
 
   useEffect(() => {
@@ -49,18 +61,15 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
       setLoading(true);
       try {
         const profileRes = await api.get('/users/profile');
-        console.log("✅ Profil chargé:", profileRes);
-        
         setUser(profileRes);
         setEditedUser(profileRes);
         localStorage.setItem('user', JSON.stringify(profileRes));
         if (setPropUser) setPropUser(profileRes);
         
         const postsRes = await api.get(`/posts/user/${profileRes.id}`);
-        setPosts(Array.isArray(postsRes) ? postsRes : []);
+        setPosts(postsRes || []);
         
       } catch (error) {
-        console.error("❌ Erreur chargement profil:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -91,7 +100,6 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
       }
 
       const response = await api.put('/users/profile', formData);
-      console.log("✅ Profil mis à jour:", response);
       
       setUser(response.user);
       setEditedUser(response.user);
@@ -105,7 +113,6 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
       setTimeout(() => setSuccess(""), 3000);
       
     } catch (err) {
-      console.error("❌ Erreur save profile:", err);
       setError(err.message || "Erreur lors de la mise à jour");
     } finally {
       setLoading(false);
@@ -119,13 +126,9 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
         setError("La photo ne doit pas dépasser 5 Mo");
         return;
       }
-      
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result);
-      };
+      reader.onloadend = () => setPhotoPreview(reader.result);
       reader.readAsDataURL(file);
-      
       setPhotoFile(file);
     }
   };
@@ -137,24 +140,21 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
       const response = await api.post('/posts', { content: newPost });
       setPosts([response, ...posts]);
       setNewPost("");
-      setSuccess("✅ Publication créée !");
-      setTimeout(() => setSuccess(""), 3000);
+      setPostMessage("✅ Publication envoyée ! Elle sera visible après approbation de l'administrateur.");
+      setTimeout(() => setPostMessage(""), 5000);
     } catch (error) {
-      console.error("❌ Erreur création post:", error);
       setError(error.message);
     }
   };
 
   const handleDeletePost = async (postId) => {
     if (!confirm("Supprimer cette publication ?")) return;
-    
     try {
       await api.delete(`/posts/${postId}`);
       setPosts(posts.filter(p => p.id !== postId));
       setSuccess("✅ Publication supprimée !");
       setTimeout(() => setSuccess(""), 3000);
     } catch (error) {
-      console.error("❌ Erreur suppression post:", error);
       setError(error.message);
     }
   };
@@ -180,57 +180,18 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
     
     try {
       await api.delete('/users/profile');
-      
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
       if (setPropUser) setPropUser(null);
-      
       alert("✅ Votre compte a été supprimé avec succès.");
       router.push("/");
-      
     } catch (error) {
-      console.error("❌ Erreur suppression compte:", error);
       setError(error.message || "Erreur lors de la suppression du compte");
       setDeletingAccount(false);
     }
   };
 
-  // ✅ FONCTION CORRIGÉE POUR LES IMAGES - VERSION ULTIME
-  const getImageUrl = (photo) => {
-    const baseUrl = getBaseUrl();
-    
-    // 1. Prévisualisation (nouvelle photo)
-    if (photoPreview) return photoPreview;
-    
-    // 2. Pas de photo
-    if (!photo) return "/default-avatar.png";
-    
-    // 3. Afficher l'URL complète pour debug
-    console.log("📸 Photo originale:", photo);
-    
-    // 4. Si c'est déjà une URL complète (https://...)
-    if (photo.startsWith('http://') || photo.startsWith('https://')) {
-      return photo;
-    }
-    
-    // 5. Si le chemin commence par /uploads
-    if (photo.startsWith('/uploads')) {
-      return `${baseUrl}${photo}`;
-    }
-    
-    // 6. Si c'est juste le nom du fichier
-    if (!photo.includes('/')) {
-      return `${baseUrl}/uploads/profiles/${photo}`;
-    }
-    
-    // 7. Fallback
-    return `${baseUrl}/uploads/profiles/${photo}`;
-  };
-
-  if (loading) {
-    return <div className={styles.loading}>Chargement...</div>;
-  }
+  if (loading) return <div className={styles.loading}>Chargement...</div>;
 
   return (
     <div className={styles.profileContainer}>
@@ -238,6 +199,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
 
       {error && <div className={styles.errorMessage}>{error}</div>}
       {success && <div className={styles.successMessage}>{success}</div>}
+      {postMessage && <div className={styles.infoMessage}>{postMessage}</div>}
 
       <div className={styles.profileCard}>
         <div className={styles.profilePhoto}>
@@ -250,10 +212,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
               className={`${styles.profileImage} ${!showPhoto ? styles.blur : ""}`}
               priority
               unoptimized
-              onError={(e) => {
-                console.log("❌ Erreur chargement image:", e.target.src);
-                e.target.src = "/default-avatar.png";
-              }}
+              onError={(e) => e.target.src = "/default-avatar.png"}
             />
           </div>
           
@@ -270,9 +229,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
                   <PhotoCameraIcon /> Changer la photo
                 </span>
               </label>
-              {photoPreview && (
-                <p className={styles.photoHint}>Nouvelle photo sélectionnée</p>
-              )}
+              {photoPreview && <p className={styles.photoHint}>Nouvelle photo sélectionnée</p>}
             </div>
           )}
 
@@ -285,47 +242,20 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
         <div className={styles.profileInfo}>
           {isEditing ? (
             <>
-              <input 
-                value={editedUser.nom || ''} 
-                onChange={(e) => setEditedUser({...editedUser, nom: e.target.value})} 
-                placeholder="Nom" 
-              />
-              <input 
-                value={editedUser.prenom || ''} 
-                onChange={(e) => setEditedUser({...editedUser, prenom: e.target.value})} 
-                placeholder="Prénom" 
-              />
-              <input 
-                type="number" 
-                value={editedUser.age || ''} 
-                onChange={(e) => setEditedUser({...editedUser, age: e.target.value})} 
-                placeholder="Âge" 
-              />
-              <input 
-                value={editedUser.ville || ''} 
-                onChange={(e) => setEditedUser({...editedUser, ville: e.target.value})} 
-                placeholder="Ville" 
-              />
-              <input 
-                value={editedUser.profession || ''} 
-                onChange={(e) => setEditedUser({...editedUser, profession: e.target.value})} 
-                placeholder="Profession" 
-              />
+              <input value={editedUser.nom || ''} onChange={(e) => setEditedUser({...editedUser, nom: e.target.value})} placeholder="Nom" />
+              <input value={editedUser.prenom || ''} onChange={(e) => setEditedUser({...editedUser, prenom: e.target.value})} placeholder="Prénom" />
+              <input type="number" value={editedUser.age || ''} onChange={(e) => setEditedUser({...editedUser, age: e.target.value})} placeholder="Âge" />
+              <input value={editedUser.ville || ''} onChange={(e) => setEditedUser({...editedUser, ville: e.target.value})} placeholder="Ville" />
+              <input value={editedUser.profession || ''} onChange={(e) => setEditedUser({...editedUser, profession: e.target.value})} placeholder="Profession" />
               
-              <select 
-                value={editedUser.sexe || ''} 
-                onChange={(e) => setEditedUser({...editedUser, sexe: e.target.value})}
-              >
+              <select value={editedUser.sexe || ''} onChange={(e) => setEditedUser({...editedUser, sexe: e.target.value})}>
                 <option value="">Sexe</option>
                 <option value="Homme">Homme</option>
                 <option value="Femme">Femme</option>
                 <option value="Autre">Autre</option>
               </select>
               
-              <select 
-                value={editedUser.religion || ''} 
-                onChange={(e) => setEditedUser({...editedUser, religion: e.target.value})}
-              >
+              <select value={editedUser.religion || ''} onChange={(e) => setEditedUser({...editedUser, religion: e.target.value})}>
                 <option value="">Religion</option>
                 <option value="Chrétien">Chrétien</option>
                 <option value="Musulman">Musulman</option>
@@ -333,39 +263,21 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
                 <option value="Autre">Autre</option>
               </select>
 
-              <select 
-                value={editedUser.statut || ''} 
-                onChange={(e) => setEditedUser({...editedUser, statut: e.target.value})}
-              >
+              <select value={editedUser.statut || ''} onChange={(e) => setEditedUser({...editedUser, statut: e.target.value})}>
                 <option value="">Statut</option>
                 <option value="Célibataire">Célibataire</option>
                 <option value="Divorcé(e)">Divorcé(e)</option>
                 <option value="Veuf(ve)">Veuf(ve)</option>
               </select>
 
-              <textarea 
-                value={editedUser.description || ''} 
-                onChange={(e) => setEditedUser({...editedUser, description: e.target.value})} 
-                placeholder="Description" 
-                rows="4" 
-              />
-              <input 
-                type="email" 
-                value={editedUser.email || ''} 
-                onChange={(e) => setEditedUser({...editedUser, email: e.target.value})} 
-                placeholder="Email" 
-              />
+              <textarea value={editedUser.description || ''} onChange={(e) => setEditedUser({...editedUser, description: e.target.value})} placeholder="Description" rows="4" />
+              <input type="email" value={editedUser.email || ''} onChange={(e) => setEditedUser({...editedUser, email: e.target.value})} placeholder="Email" />
               
               <div className={styles.editActions}>
                 <button onClick={handleSaveProfile} className={styles.saveBtn} disabled={loading}>
                   {loading ? 'Enregistrement...' : 'Enregistrer'}
                 </button>
-                <button onClick={() => {
-                  setIsEditing(false);
-                  setEditedUser(user);
-                  setPhotoFile(null);
-                  setPhotoPreview("");
-                }} className={styles.cancelBtn}>
+                <button onClick={() => { setIsEditing(false); setEditedUser(user); setPhotoFile(null); setPhotoPreview(""); }} className={styles.cancelBtn}>
                   <CancelIcon /> Annuler
                 </button>
               </div>
@@ -391,11 +303,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
                 <button className={styles.editBtn} onClick={() => setIsEditing(true)}>
                   <EditIcon /> Modifier le profil
                 </button>
-                <button 
-                  className={styles.deleteAccountBtn} 
-                  onClick={handleDeleteAccount}
-                  disabled={deletingAccount}
-                >
+                <button className={styles.deleteAccountBtn} onClick={handleDeleteAccount} disabled={deletingAccount}>
                   <DeleteIcon /> {deletingAccount ? 'Suppression...' : 'Supprimer le compte'}
                 </button>
               </>
@@ -420,7 +328,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
       <div className={styles.feed}>
         <h3>Mes publications ({posts.length})</h3>
         {posts.map((post) => (
-          <div key={post.id} className={styles.postCard}>
+          <div key={post.id} className={`${styles.postCard} ${post.status === 'pending' ? styles.pendingPost : ''}`}>
             <div className={styles.postHeader}>
               <Image 
                 src={getImageUrl(user?.photo)}
@@ -443,6 +351,18 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
             </div>
 
             <p className={styles.postContent}>{post.content}</p>
+
+            <div className={styles.postStatus}>
+              {post.status === 'pending' ? (
+                <div className={styles.pendingStatus}>
+                  <HourglassEmptyIcon /> En attente d'approbation
+                </div>
+              ) : (
+                <div className={styles.approvedStatus}>
+                  <CheckCircleIcon /> Approuvé et visible
+                </div>
+              )}
+            </div>
 
             <div className={styles.postActions}>
               <button className={styles.deletePostBtn} onClick={() => handleDeletePost(post.id)}>

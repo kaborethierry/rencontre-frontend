@@ -836,3 +836,55 @@
   margin: 40px auto;
   box-shadow: 0 4px 15px rgba(255,105,180,0.1);
 }
+/* Styles pour les statuts des publications */
+.infoMessage {
+  background: #e3f2fd;
+  color: #0A1F44;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-left: 4px solid #2196F3;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pendingPost {
+  border-left: 4px solid #FF9800 !important;
+  background: linear-gradient(to right, rgba(255,152,0,0.05), white) !important;
+}
+
+.postStatus {
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.95em;
+}
+
+.pendingStatus {
+  color: #FF9800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff3e0;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.approvedStatus {
+  color: #4CAF50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8f5e9;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .postStatus {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

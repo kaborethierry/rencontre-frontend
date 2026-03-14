@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import styles from "./admin.module.css";
@@ -30,6 +30,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import PersonIcon from "@mui/icons-material/Person";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 
 export default function Admin({ user }) {
   const router = useRouter();
@@ -51,8 +52,9 @@ export default function Admin({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [permission, setPermission] = useState('default');
+  const [lastNotificationCount, setLastNotificationCount] = useState(0);
+  const audioRef = useRef(null);
 
-  // ✅ URL de base dynamique
   const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
       if (window.location.hostname.includes('rencontreauthentique.org')) {
@@ -62,7 +64,6 @@ export default function Admin({ user }) {
     return 'http://localhost:5000';
   };
 
-  // ✅ Fonction pour les images
   const getImageUrl = (photo) => {
     const baseUrl = getBaseUrl();
     if (!photo) return "/default-avatar.png";
@@ -74,16 +75,17 @@ export default function Admin({ user }) {
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
-  // ✅ Fonction pour jouer le son
+  useEffect(() => {
+    audioRef.current = new Audio('/notification.mp3');
+    audioRef.current.load();
+  }, []);
+
   const playNotificationSound = () => {
-    if (!soundEnabled) return;
-    try {
-      const audio = new Audio('/notification.mp3');
-      audio.play().catch(e => console.log("Son bloqué"));
-    } catch (error) {}
+    if (!soundEnabled || !audioRef.current) return;
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().catch(() => {});
   };
 
-  // ✅ S'abonner aux notifications push
   useEffect(() => {
     const subscribeToPush = async () => {
       if ('Notification' in window && 'serviceWorker' in navigator) {
@@ -111,16 +113,13 @@ export default function Admin({ user }) {
     subscribeToPush();
   }, []);
 
-  // ✅ Charger les posts en attente en temps réel
   const loadPendingPosts = async () => {
     try {
       const pendingRes = await api.get('/admin/posts/pending');
       
-      // Si de nouveaux posts arrivent
-      if (pendingRes.length > pendingPosts.length) {
+      if (pendingRes.length > lastNotificationCount) {
         playNotificationSound();
         
-        // Afficher une notification push
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification('📝 Nouvelle publication en attente', {
             body: `${pendingRes[0]?.prenom} ${pendingRes[0]?.nom} a publié un message`,
@@ -128,14 +127,12 @@ export default function Admin({ user }) {
             badge: '/favicon.ico',
             vibrate: [200, 100, 200],
             requireInteraction: true,
-            data: {
-              url: '/admin?tab=posts',
-              postId: pendingRes[0]?.id
-            }
+            data: { url: '/admin?tab=posts' }
           });
         }
       }
       
+      setLastNotificationCount(pendingRes.length);
       setPendingPosts(pendingRes);
     } catch (error) {
       console.error("Erreur chargement posts:", error);
@@ -158,8 +155,7 @@ export default function Admin({ user }) {
 
     loadDashboardData();
     
-    // WebSocket en temps réel (toutes les 5 secondes)
-    const interval = setInterval(loadPendingPosts, 5000);
+    const interval = setInterval(loadPendingPosts, 10000);
     
     return () => clearInterval(interval);
   }, [user]);
@@ -302,7 +298,6 @@ export default function Admin({ user }) {
 
   return (
     <div className={styles.adminContainer}>
-      {/* En-tête avec message de bienvenue */}
       <div className={styles.adminHeader}>
         <h1 className={styles.adminTitle}>Administration</h1>
         
@@ -338,7 +333,6 @@ export default function Admin({ user }) {
 
       {error && <div className={styles.errorMessage}>{error}</div>}
 
-      {/* Barre latérale */}
       <div className={styles.adminLayout}>
         <div className={styles.sidebar}>
           <button 
@@ -385,7 +379,6 @@ export default function Admin({ user }) {
         </div>
 
         <div className={styles.mainContent}>
-          {/* Tableau de bord */}
           {activeTab === 'dashboard' && stats && (
             <div className={styles.dashboard}>
               <div className={styles.statsGrid}>
@@ -397,7 +390,6 @@ export default function Admin({ user }) {
                     <small>+{stats.newUsersToday} aujourd'hui</small>
                   </div>
                 </div>
-
                 <div className={styles.statCard}>
                   <AccessTimeIcon className={styles.statIcon} style={{color: '#2196F3'}} />
                   <div className={styles.statInfo}>
@@ -406,7 +398,6 @@ export default function Admin({ user }) {
                     <small>Connectés maintenant</small>
                   </div>
                 </div>
-
                 <div className={styles.statCard}>
                   <PostAddIcon className={styles.statIcon} />
                   <div className={styles.statInfo}>
@@ -415,7 +406,6 @@ export default function Admin({ user }) {
                     <small>+{stats.newPostsToday} aujourd'hui</small>
                   </div>
                 </div>
-
                 <div className={styles.statCard}>
                   <ChatIcon className={styles.statIcon} />
                   <div className={styles.statInfo}>
@@ -423,7 +413,6 @@ export default function Admin({ user }) {
                     <p className={styles.statNumber}>{stats.totalComments}</p>
                   </div>
                 </div>
-
                 <div className={styles.statCard}>
                   <FavoriteIcon className={styles.statIcon} />
                   <div className={styles.statInfo}>
@@ -431,7 +420,6 @@ export default function Admin({ user }) {
                     <p className={styles.statNumber}>{stats.totalLikes}</p>
                   </div>
                 </div>
-
                 <div className={styles.statCard}>
                   <WarningIcon className={styles.statIcon} style={{color: '#ff9800'}} />
                   <div className={styles.statInfo}>
@@ -440,7 +428,6 @@ export default function Admin({ user }) {
                     <small>En attente</small>
                   </div>
                 </div>
-
                 <div className={styles.statCard}>
                   <BlockIcon className={styles.statIcon} style={{color: '#f44336'}} />
                   <div className={styles.statInfo}>
@@ -449,55 +436,9 @@ export default function Admin({ user }) {
                   </div>
                 </div>
               </div>
-
-              {/* Graphiques simplifiés */}
-              <div className={styles.chartsSection}>
-                <div className={styles.chartCard}>
-                  <h3>Nouveaux utilisateurs (6 mois)</h3>
-                  <div className={styles.barChart}>
-                    {stats.usersByMonth?.map((item, index) => (
-                      <div key={index} className={styles.barItem}>
-                        <div className={styles.barLabel}>{item.month}</div>
-                        <div className={styles.barContainer}>
-                          <div 
-                            className={styles.bar}
-                            style={{ 
-                              width: `${Math.min(100, (item.count / Math.max(...stats.usersByMonth.map(i => i.count)) * 100))}%` 
-                            }}
-                          >
-                            {item.count}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={styles.chartCard}>
-                  <h3>Nouvelles publications (6 mois)</h3>
-                  <div className={styles.barChart}>
-                    {stats.postsByMonth?.map((item, index) => (
-                      <div key={index} className={styles.barItem}>
-                        <div className={styles.barLabel}>{item.month}</div>
-                        <div className={styles.barContainer}>
-                          <div 
-                            className={styles.bar}
-                            style={{ 
-                              width: `${Math.min(100, (item.count / Math.max(...stats.postsByMonth.map(i => i.count)) * 100))}%` 
-                            }}
-                          >
-                            {item.count}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* Gestion des utilisateurs */}
           {activeTab === 'users' && (
             <div className={styles.usersSection}>
               <div className={styles.sectionHeader}>
@@ -597,7 +538,6 @@ export default function Admin({ user }) {
             </div>
           )}
 
-          {/* Gestion des publications */}
           {activeTab === 'posts' && (
             <div className={styles.postsSection}>
               <h2>Publications en attente ({pendingPosts.length})</h2>
@@ -644,7 +584,6 @@ export default function Admin({ user }) {
             </div>
           )}
 
-          {/* Gestion des signalements */}
           {activeTab === 'reports' && (
             <div className={styles.reportsSection}>
               <h2>Gestion des signalements</h2>
@@ -758,7 +697,6 @@ export default function Admin({ user }) {
             </div>
           )}
 
-          {/* Messages privés */}
           {activeTab === 'messages' && (
             <div className={styles.messagesSection}>
               <h2>Messages privés</h2>
@@ -869,7 +807,6 @@ export default function Admin({ user }) {
             </div>
           )}
 
-          {/* Messages de contact */}
           {activeTab === 'contact' && (
             <div className={styles.contactSection}>
               <h2>Messages de contact</h2>
