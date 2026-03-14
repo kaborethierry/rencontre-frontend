@@ -28,10 +28,10 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
   const [success, setSuccess] = useState("");
   const [deletingAccount, setDeletingAccount] = useState(false);
 
-  // ✅ URL de base dynamique - CORRIGÉE
+  // ✅ URL de base dynamique
   const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
-      if (window.location.hostname.includes('rencontreauthentique.org')) {
+      if (window.location.hostname === 'rencontreauthentique.org') {
         return 'https://green-alpaca-449310.hostingersite.com';
       }
     }
@@ -196,13 +196,35 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
     }
   };
 
+  // ✅ FONCTION CORRIGÉE POUR LES IMAGES - VERSION ULTIME
   const getImageUrl = (photo) => {
     const baseUrl = getBaseUrl();
     
+    // 1. Prévisualisation (nouvelle photo)
     if (photoPreview) return photoPreview;
+    
+    // 2. Pas de photo
     if (!photo) return "/default-avatar.png";
-    if (photo.startsWith('http')) return photo;
-    if (photo.startsWith('/uploads')) return `${baseUrl}${photo}`;
+    
+    // 3. Afficher l'URL complète pour debug
+    console.log("📸 Photo originale:", photo);
+    
+    // 4. Si c'est déjà une URL complète (https://...)
+    if (photo.startsWith('http://') || photo.startsWith('https://')) {
+      return photo;
+    }
+    
+    // 5. Si le chemin commence par /uploads
+    if (photo.startsWith('/uploads')) {
+      return `${baseUrl}${photo}`;
+    }
+    
+    // 6. Si c'est juste le nom du fichier
+    if (!photo.includes('/')) {
+      return `${baseUrl}/uploads/profiles/${photo}`;
+    }
+    
+    // 7. Fallback
     return `${baseUrl}/uploads/profiles/${photo}`;
   };
 

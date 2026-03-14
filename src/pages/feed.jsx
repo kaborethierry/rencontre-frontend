@@ -14,7 +14,7 @@ import SendIcon from "@mui/icons-material/Send";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
 // Composant mémoïsé pour chaque post (évite les re-rendus)
-const PostCard = memo(({ post, currentUser, onLike, onMessage, onDeleteComment }) => {
+const PostCard = memo(({ post, currentUser, onMessage }) => {
   const [liked, setLiked] = useState(post.likesUsers?.includes(currentUser?.id) || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
   const [comments, setComments] = useState(post.comments || []);
@@ -175,7 +175,10 @@ PostCard.displayName = 'PostCard';
 export default function Feed({ user }) {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
   const messages = [
@@ -193,6 +196,7 @@ export default function Feed({ user }) {
         setLoading(true);
         const data = await api.get('/posts');
         setPosts(data || []);
+        setFilteredPosts(data || []);
       } catch (error) {
         console.error("Erreur chargement feed:", error);
       } finally {
@@ -208,6 +212,23 @@ export default function Feed({ user }) {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Recherche en temps réel
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredPosts(posts);
+      return;
+    }
+    
+    const term = searchTerm.toLowerCase();
+    const filtered = posts.filter(post => 
+      post.prenom?.toLowerCase().includes(term) ||
+      post.nom?.toLowerCase().includes(term) ||
+      post.ville?.toLowerCase().includes(term) ||
+      post.content?.toLowerCase().includes(term)
+    );
+    setFilteredPosts(filtered);
+  }, [searchTerm, posts]);
 
   const handleMessage = (userId) => {
     if (!user) {
@@ -245,12 +266,33 @@ export default function Feed({ user }) {
           </div>
         </div>
       ) : (
-        <div className={styles.connectedMessage}>
-          <p>✅ Connecté en tant que {user.prenom}</p>
-        </div>
+        <>
+          <div className={styles.connectedMessage}>
+            <p>✅ Connecté en tant que {user.prenom}</p>
+            <button 
+              className={styles.searchToggle}
+              onClick={() => setShowSearch(!showSearch)}
+            >
+              🔍 Rechercher
+            </button>
+          </div>
+
+          {showSearch && (
+            <div className={styles.searchSection}>
+              <input
+                type="text"
+                placeholder="Rechercher par nom, prénom, ville ou contenu..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.searchInput}
+                autoFocus
+              />
+            </div>
+          )}
+        </>
       )}
 
-      {posts.map(post => (
+      {filteredPosts.map(post => (
         <PostCard
           key={post.id}
           post={post}
@@ -258,6 +300,12 @@ export default function Feed({ user }) {
           onMessage={handleMessage}
         />
       ))}
+
+      {filteredPosts.length === 0 && posts.length > 0 && (
+        <div className={styles.noResults}>
+          <p>Aucun résultat pour "{searchTerm}"</p>
+        </div>
+      )}
 
       {posts.length === 0 && (
         <div className={styles.noPosts}>
