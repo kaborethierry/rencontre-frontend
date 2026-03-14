@@ -877,3 +877,138 @@
     justify-content: center;
   }
 }
+
+/* Styles pour les notifications */
+.notificationBtn {
+  background: #FF69B4;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.notificationBtn:hover {
+  background: #ff4da6;
+  transform: translateY(-2px);
+}
+
+.notificationBadge {
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  min-width: 20px;
+  text-align: center;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}
+
+/* Posts en attente */
+.pendingPostsList {
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.pendingPostCard {
+  background: #fff0f7;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-left: 4px solid #FF69B4;
+  box-shadow: 0 4px 10px rgba(255,105,180,0.1);
+  animation: slideIn 0.3s ease;
+}
+
+.postHeader {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.postContent {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin: 15px 0;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  color: #333;
+}
+
+.approveBtn {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  transition: all 0.3s;
+  flex: 1;
+  justify-content: center;
+}
+
+.approveBtn:hover {
+  background: #2e7d32;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.rejectBtn {
+  background: #ffebee;
+  color: #c62828;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1em;
+  transition: all 0.3s;
+  flex: 1;
+  justify-content: center;
+}
+
+.rejectBtn:hover {
+  background: #c62828;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.postActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.noPosts {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+  font-size: 1.2em;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

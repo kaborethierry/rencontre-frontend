@@ -28,6 +28,8 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import WarningIcon from "@mui/icons-material/Warning";
 import ImageIcon from "@mui/icons-material/Image";
 import PersonIcon from "@mui/icons-material/Person";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 
 export default function Admin({ user }) {
   const router = useRouter();
@@ -37,6 +39,7 @@ export default function Admin({ user }) {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [pendingPosts, setPendingPosts] = useState([]);
   const [reports, setReports] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
@@ -45,29 +48,106 @@ export default function Admin({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [onlineUsers, setOnlineUsers] = useState(0);
   const [imageErrors, setImageErrors] = useState({});
+  const [notifications, setNotifications] = useState([]);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [permission, setPermission] = useState('default');
 
   // ✅ URL de base dynamique
   const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
-      if (window.location.hostname === 'rencontreauthentique.org') {
+      if (window.location.hostname.includes('rencontreauthentique.org')) {
         return 'https://green-alpaca-449310.hostingersite.com';
       }
     }
     return 'http://localhost:5000';
   };
 
-  // ✅ Fonction corrigée pour les images
+  // ✅ Fonction pour les images
   const getImageUrl = (photo) => {
     const baseUrl = getBaseUrl();
-    
     if (!photo) return "/default-avatar.png";
-    if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
-    if (photo.startsWith('/uploads')) return `${baseUrl}${photo}`;
-    return `${baseUrl}/uploads/profiles/${photo}`;
+    if (photo.startsWith('http')) return photo;
+    return `${baseUrl}${photo}`;
   };
 
   const handleImageError = (id) => {
     setImageErrors(prev => ({ ...prev, [id]: true }));
+  };
+
+  // ✅ Demander la permission pour les notifications
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermission(Notification.permission);
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(perm => setPermission(perm));
+      }
+    }
+
+    // Enregistrer le service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker enregistré'))
+        .catch(err => console.error('Erreur SW:', err));
+    }
+  }, []);
+
+  // ✅ Fonction pour jouer le son et afficher la notification
+  const showNotification = (title, body, url = '/admin') => {
+    // Son
+    if (soundEnabled) {
+      try {
+        const audio = new Audio('/notification.mp3');
+        audio.play().catch(e => console.log("Son bloqué"));
+      } catch (error) {}
+    }
+
+    // Notification push
+    if ('Notification' in window && Notification.permission === 'granted') {
+      // Notification native
+      const notification = new Notification(title, {
+        body: body,
+        icon: '/logo192.png',
+        badge: '/favicon.ico',
+        vibrate: [200, 100, 200],
+        tag: 'new-post',
+        renotify: true,
+        requireInteraction: true,
+        silent: !soundEnabled
+      });
+
+      notification.onclick = () => {
+        window.focus();
+        router.push(url);
+        notification.close();
+      };
+    }
+  };
+
+  // ✅ Charger les notifications et posts en attente
+  const loadPendingData = async () => {
+    try {
+      // Récupérer les notifications non lues
+      const notifsRes = await api.get('/notifications/unread').catch(() => []);
+      const newNotifs = notifsRes || [];
+      
+      // Récupérer les posts en attente
+      const pendingRes = await api.get('/admin/posts/pending').catch(() => []);
+      const newPending = pendingRes || [];
+      
+      // S'il y a de nouvelles notifications, alerter l'admin
+      if (newPending.length > pendingPosts.length || newNotifs.length > notifications.length) {
+        showNotification(
+          '📝 Nouvelle publication en attente',
+          `${newPending[0]?.prenom} ${newPending[0]?.nom} a publié un message`,
+          '/admin?tab=posts'
+        );
+      }
+      
+      setPendingPosts(newPending);
+      setNotifications(newNotifs);
+    } catch (error) {
+      console.error("Erreur chargement notifications:", error);
+    }
   };
 
   useEffect(() => {
@@ -85,6 +165,11 @@ export default function Admin({ user }) {
     }
 
     loadDashboardData();
+    
+    // Vérifier les nouvelles publications toutes les 15 secondes
+    const interval = setInterval(loadPendingData, 15000);
+    
+    return () => clearInterval(interval);
   }, [user]);
 
   const loadDashboardData = async () => {
@@ -114,6 +199,9 @@ export default function Admin({ user }) {
         return diff < 5;
       }).length;
       setOnlineUsers(online);
+
+      // Charger les posts en attente
+      await loadPendingData();
       
     } catch (error) {
       console.error("Erreur chargement admin:", error);
@@ -149,7 +237,7 @@ export default function Admin({ user }) {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (!confirm("⚠️ Supprimer définitivement cet utilisateur ?\nToutes ses données seront effacées.")) return;
+    if (!confirm("⚠️ Supprimer définitivement cet utilisateur ?")) return;
     try {
       await api.delete(`/admin/users/${userId}`);
       setUsers(users.filter(u => u.id !== userId));
@@ -163,8 +251,25 @@ export default function Admin({ user }) {
     try {
       await api.delete(`/admin/posts/${postId}`);
       setPosts(posts.filter(p => p.id !== postId));
+      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
     } catch (error) {
       console.error("Erreur suppression post:", error);
+    }
+  };
+
+  const handleApprovePost = async (postId) => {
+    try {
+      await api.put(`/admin/posts/${postId}/approve`);
+      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
+      // Son de confirmation
+      if (soundEnabled) {
+        try {
+          const audio = new Audio('/notification.mp3');
+          audio.play().catch(e => {});
+        } catch (error) {}
+      }
+    } catch (error) {
+      console.error("Erreur approbation:", error);
     }
   };
 
@@ -205,6 +310,8 @@ export default function Admin({ user }) {
     u.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalPending = pendingPosts.length + notifications.length;
+
   if (loading) {
     return <div className={styles.loading}>Chargement du portail admin...</div>;
   }
@@ -229,6 +336,14 @@ export default function Admin({ user }) {
                 <AdminPanelSettingsIcon />
                 <span>Administrateur</span>
               </div>
+              <button 
+                className={styles.notificationBtn}
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                title={soundEnabled ? "Son activé" : "Son désactivé"}
+              >
+                {soundEnabled ? <NotificationsActiveIcon /> : <NotificationsOffIcon />}
+                {totalPending > 0 && <span className={styles.notificationBadge}>{totalPending}</span>}
+              </button>
               <button onClick={handleBackToSite} className={styles.backToSiteBtn}>
                 <HomeIcon /> Retour au site
               </button>
@@ -260,7 +375,7 @@ export default function Admin({ user }) {
             onClick={() => setActiveTab('posts')}
           >
             <PostAddIcon /> Publications
-            <span className={styles.badge}>{posts.length}</span>
+            {pendingPosts.length > 0 && <span className={styles.badge}>{pendingPosts.length}</span>}
           </button>
           <button 
             className={`${styles.sidebarItem} ${activeTab === 'reports' ? styles.active : ''}`}
@@ -501,70 +616,46 @@ export default function Admin({ user }) {
           {/* Gestion des publications */}
           {activeTab === 'posts' && (
             <div className={styles.postsSection}>
-              <h2>Gestion des publications</h2>
-              <div className={styles.tableContainer}>
-                <table className={styles.dataTable}>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Photo</th>
-                      <th>Auteur</th>
-                      <th>Contenu</th>
-                      <th>Âge</th>
-                      <th>Ville</th>
-                      <th>Religion</th>
-                      <th>Likes</th>
-                      <th>Commentaires</th>
-                      <th>Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {posts.map(post => (
-                      <tr key={post.id}>
-                        <td>{post.id}</td>
-                        <td>
-                          <div className={styles.avatarWrapper}>
-                            {!imageErrors[`post-${post.id}`] ? (
-                              <Image 
-                                src={getImageUrl(post.userPhoto)}
-                                alt={post.prenom}
-                                width={40}
-                                height={40}
-                                className={styles.userAvatar}
-                                onError={() => handleImageError(`post-${post.id}`)}
-                                unoptimized
-                              />
-                            ) : (
-                              <div className={styles.avatarFallback}>
-                                <PersonIcon />
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td>{post.prenom} {post.nom}</td>
-                        <td className={styles.postContentCell}>
-                          {post.content?.substring(0, 50)}...
-                        </td>
-                        <td>{post.age || '-'}</td>
-                        <td>{post.ville || '-'}</td>
-                        <td>{post.religion || '-'}</td>
-                        <td>{post.likesCount}</td>
-                        <td>{post.commentsCount}</td>
-                        <td>{new Date(post.createdAt).toLocaleDateString('fr-FR')}</td>
-                        <td>
-                          <button 
-                            className={`${styles.actionBtn} ${styles.deleteBtn}`}
-                            onClick={() => handleDeletePost(post.id)}
-                            title="Supprimer"
-                          >
-                            <DeleteIcon />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <h2>Publications en attente ({pendingPosts.length})</h2>
+              <div className={styles.pendingPostsList}>
+                {pendingPosts.length === 0 ? (
+                  <p className={styles.noPosts}>Aucune publication en attente</p>
+                ) : (
+                  pendingPosts.map(post => (
+                    <div key={post.id} className={styles.pendingPostCard}>
+                      <div className={styles.postHeader}>
+                        <Image 
+                          src={getImageUrl(post.photo)}
+                          alt={post.prenom}
+                          width={50}
+                          height={50}
+                          className={styles.userAvatar}
+                          unoptimized
+                        />
+                        <div>
+                          <strong>{post.prenom} {post.nom}</strong>
+                          <p>{post.age} ans | {post.ville} | {post.religion}</p>
+                          <small>{new Date(post.createdAt).toLocaleString('fr-FR')}</small>
+                        </div>
+                      </div>
+                      <p className={styles.postContent}>{post.content}</p>
+                      <div className={styles.postActions}>
+                        <button 
+                          className={styles.approveBtn}
+                          onClick={() => handleApprovePost(post.id)}
+                        >
+                          <CheckCircleIcon /> Approuver
+                        </button>
+                        <button 
+                          className={styles.rejectBtn}
+                          onClick={() => handleDeletePost(post.id)}
+                        >
+                          <DeleteIcon /> Rejeter
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
