@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,8 +13,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
-// Composant mémorisé pour chaque post (évite les re-rendus inutiles)
-const PostCard = memo(({ post, currentUser, onLike, onMessage, onComment, onDeleteComment }) => {
+// Composant mémoïsé pour chaque post (évite les re-rendus)
+const PostCard = memo(({ post, currentUser, onLike, onMessage, onDeleteComment }) => {
   const [liked, setLiked] = useState(post.likesUsers?.includes(currentUser?.id) || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
   const [comments, setComments] = useState(post.comments || []);
@@ -81,6 +81,7 @@ const PostCard = memo(({ post, currentUser, onLike, onMessage, onComment, onDele
             height={50}
             className={styles.postUserPhoto}
             unoptimized
+            onError={(e) => e.target.src = "/default-avatar.png"}
           />
         </Link>
         <div className={styles.postHeaderInfo}>
@@ -107,14 +108,14 @@ const PostCard = memo(({ post, currentUser, onLike, onMessage, onComment, onDele
       </div>
 
       <div className={styles.postActions}>
-        <button className={styles.likeBtn} onClick={handleLike}>
+        <button className={styles.likeBtn} onClick={handleLike} disabled={!currentUser}>
           {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
           {likesCount}
         </button>
-        <button className={styles.commentBtn} onClick={() => setShowComments(!showComments)}>
+        <button className={styles.commentBtn} onClick={() => setShowComments(!showComments)} disabled={!currentUser}>
           <CommentIcon /> Commenter
         </button>
-        <button className={styles.messageBtn} onClick={() => onMessage(post.userId)} disabled={isOwnPost}>
+        <button className={styles.messageBtn} onClick={() => onMessage(post.userId)} disabled={!currentUser || isOwnPost}>
           <MessageIcon /> Message
         </button>
       </div>
@@ -133,6 +134,7 @@ const PostCard = memo(({ post, currentUser, onLike, onMessage, onComment, onDele
                   height={30}
                   className={styles.commentUserPhoto}
                   unoptimized
+                  onError={(e) => e.target.src = "/default-avatar.png"}
                 />
                 <div className={styles.commentContent}>
                   <strong>{isOwnComment ? "Vous" : `${comment.prenom} ${comment.nom}`}</strong>
@@ -184,12 +186,12 @@ export default function Feed({ user }) {
     "🌟 Trouvez la personne qui vous correspond vraiment"
   ];
 
-  // Chargement optimisé des posts
+  // Chargement des posts - UNE SEULE REQUÊTE
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const data = await api.get('/posts/approved');
+        const data = await api.get('/posts');
         setPosts(data || []);
       } catch (error) {
         console.error("Erreur chargement feed:", error);
