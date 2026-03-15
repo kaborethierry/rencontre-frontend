@@ -107,10 +107,11 @@
   width: 100%;
 }
 
-/* ✅ FLOU SUPPRIMÉ - L'image reste toujours visible */
+/* ✅ Masquage fonctionnel - s'active quand showPhoto = false */
 .blur {
-  /* filter: blur(8px); */  /* ← LIGNE COMPLÈTEMENT SUPPRIMÉE */
-  opacity: 1;
+  filter: blur(8px);  /* ← Le flou s'applique quand on veut masquer */
+  opacity: 0.7;
+  transition: all 0.3s ease;
 }
 
 .togglePhoto {
