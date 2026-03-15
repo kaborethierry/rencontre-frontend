@@ -1220,3 +1220,10 @@
   gap: 15px;
   flex-wrap: wrap;
 }
+
+@media (max-width: 768px) {
+  .pendingPostsGrid {
+    grid-template-columns: 1fr;
+  }
+  /* ... */
+}
