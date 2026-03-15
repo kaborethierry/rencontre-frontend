@@ -26,10 +26,9 @@ class ApiService {
     return null;
   }
 
-  getHeaders(extraHeaders = {}) {
+  getHeaders() {
     const headers = {
       'Content-Type': 'application/json',
-      ...extraHeaders
     };
     
     const token = this.getToken();
@@ -81,23 +80,16 @@ class ApiService {
     return data;
   }
 
-  // ✅ GET avec headers anti-cache pour mobile
+  // ✅ GET avec timestamp uniquement (pas de headers supplémentaires)
   async get(endpoint, options = {}) {
-    // Headers anti-cache pour mobile
-    const cacheHeaders = {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    };
-    
-    // Ajouter un timestamp à l'URL si ce n'est pas déjà fait
+    // Ajouter un timestamp à l'URL pour éviter le cache
     const url = endpoint.includes('?') 
       ? `${endpoint}&_=${Date.now()}` 
       : `${endpoint}?_=${Date.now()}`;
     
     const response = await fetch(`${this.baseURL}${url}`, {
       method: 'GET',
-      headers: this.getHeaders(cacheHeaders),
+      headers: this.getHeaders(), // Uniquement les headers standards
       ...options
     });
     return this.handleResponse(response);
