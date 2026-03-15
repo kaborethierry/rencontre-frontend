@@ -60,7 +60,30 @@ class ApiService {
     }
     
     if (!response.ok) {
+      // ✅ NE PAS DÉCONNECTER IMMÉDIATEMENT POUR 401 SUR LES REQUÊTES NON CRITIQUES
       if (response.status === 401) {
+        // Vérifier si c'est une route admin ou protégée
+        const url = response.url;
+        const isAdminRoute = url.includes('/admin/');
+        const isAuthRoute = url.includes('/auth/');
+        
+        // Si c'est une route d'authentification, ne pas déconnecter
+        if (isAuthRoute) {
+          throw new Error(data.message || 'Erreur d\'authentification');
+        }
+        
+        // Pour les routes admin, vérifier d'abord si l'utilisateur est toujours valide
+        if (isAdminRoute) {
+          const user = this.getUser();
+          if (user && user.role === 'admin') {
+            // Peut-être un faux positif, on ne déconnecte pas
+            console.warn('⚠️ 401 sur route admin mais utilisateur semble valide');
+            throw new Error('Session temporairement indisponible, réessayez');
+          }
+        }
+        
+        // Déconnexion seulement si vraiment nécessaire
+        console.log('🔑 Token invalide, déconnexion');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
@@ -80,22 +103,23 @@ class ApiService {
     return data;
   }
 
-  // ✅ GET avec timestamp dans l'URL - SANS headers supplémentaires
   async get(endpoint, options = {}) {
-    // Nettoyer l'endpoint des paramètres existants
     const baseEndpoint = endpoint.split('?')[0];
-    
-    // Construire l'URL avec timestamp
     const url = `${baseEndpoint}?_=${Date.now()}`;
     
     console.log(`📡 GET: ${url}`);
     
-    const response = await fetch(`${this.baseURL}${url}`, {
-      method: 'GET',
-      headers: this.getHeaders(), // UNIQUEMENT Content-Type et Authorization
-      ...options
-    });
-    return this.handleResponse(response);
+    try {
+      const response = await fetch(`${this.baseURL}${url}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+        ...options
+      });
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error(`❌ Erreur GET ${endpoint}:`, error);
+      throw error;
+    }
   }
 
   async post(endpoint, data) {
@@ -104,12 +128,17 @@ class ApiService {
       'Authorization': `Bearer ${this.getToken()}`
     } : this.getHeaders();
     
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: 'POST',
-      headers,
-      body: isFormData ? data : JSON.stringify(data),
-    });
-    return this.handleResponse(response);
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'POST',
+        headers,
+        body: isFormData ? data : JSON.stringify(data),
+      });
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error(`❌ Erreur POST ${endpoint}:`, error);
+      throw error;
+    }
   }
 
   async put(endpoint, data) {
@@ -118,20 +147,30 @@ class ApiService {
       'Authorization': `Bearer ${this.getToken()}`
     } : this.getHeaders();
     
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: 'PUT',
-      headers,
-      body: isFormData ? data : JSON.stringify(data),
-    });
-    return this.handleResponse(response);
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'PUT',
+        headers,
+        body: isFormData ? data : JSON.stringify(data),
+      });
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error(`❌ Erreur PUT ${endpoint}:`, error);
+      throw error;
+    }
   }
 
   async delete(endpoint) {
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: 'DELETE',
-      headers: this.getHeaders(),
-    });
-    return this.handleResponse(response);
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error(`❌ Erreur DELETE ${endpoint}:`, error);
+      throw error;
+    }
   }
 }
 
