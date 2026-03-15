@@ -36,7 +36,7 @@ export default function Footer() {
                 <FacebookIcon />
               </a>
               <a 
-                href="https://wa.me/22644488323" 
+                href="https://wa.me/22668749359" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className={styles.socialLink}
@@ -99,7 +99,7 @@ export default function Footer() {
                 <WhatsAppIcon className={styles.contactIcon} style={{color: '#25D366'}} />
                 <div>
                   <strong>WhatsApp:</strong>
-                  <p>+226 44 48 83 23</p>
+                  <p>+226 68 74 93 59</p>
                 </div>
               </li>
               <li>

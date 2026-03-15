@@ -154,9 +154,9 @@ export default function Contact() {
               </div>
               <div className={styles.infoContent}>
                 <h3>WhatsApp</h3>
-                <p>+226 44 48 83 23</p>
+                <p>+226 68 74 93 59</p>
                 <a 
-                  href="https://wa.me/22644488323" 
+                  href="https://wa.me/22668749359" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className={styles.contactLink}

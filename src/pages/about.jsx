@@ -59,7 +59,7 @@ export default function AboutPage() {
             </h3>
             <ul>
               <li>Femmes : 18 ans et plus</li>
-              <li>Hommes : 25 à 50 ans</li>
+              <li>Hommes : 25 et plus</li>
               <li>Afrique et diaspora</li>
             </ul>
           </div>
