@@ -123,7 +123,6 @@ export default function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
-        {/* 🔥 AJOUT DE LA BALISE GOOGLE VERIFICATION */}
         <meta name="google-site-verification" content="b6SMvqmG4rigKcx-0NHE-1XA6XmfoOJiHfd8Kh-vXN0" />
         
         {/* Métadonnées de base */}
@@ -150,14 +149,14 @@ export default function MyApp({ Component, pageProps }) {
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={`https://rencontreauthentique.org${image}`} />
         
-        {/* Favicon - versions multiples pour tous les navigateurs */}
+        {/* Favicon */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         
-        {/* Sécurité : forcer HTTPS et empêcher le contenu mixte */}
+        {/* Sécurité */}
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       </Head>
