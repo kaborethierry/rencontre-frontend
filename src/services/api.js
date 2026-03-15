@@ -13,7 +13,14 @@ class ApiService {
 
   getToken() {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('token');
+      const token = localStorage.getItem('token');
+      // ✅ LOG POUR DIAGNOSTIC MOBILE
+      if (token) {
+        console.log('🔑 Token trouvé dans localStorage');
+      } else {
+        console.warn('⚠️ AUCUN TOKEN dans localStorage');
+      }
+      return token;
     }
     return null;
   }
@@ -34,6 +41,9 @@ class ApiService {
     const token = this.getToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      console.log('✅ Token ajouté aux headers');
+    } else {
+      console.warn('⚠️ Pas de token à ajouter aux headers');
     }
     
     return headers;
@@ -60,30 +70,21 @@ class ApiService {
     }
     
     if (!response.ok) {
-      // ✅ NE PAS DÉCONNECTER IMMÉDIATEMENT POUR 401 SUR LES REQUÊTES NON CRITIQUES
       if (response.status === 401) {
-        // Vérifier si c'est une route admin ou protégée
+        console.warn('🔴 Réponse 401 reçue - Token invalide ou expiré');
+        
+        // Vérifier si c'est une route admin
         const url = response.url;
         const isAdminRoute = url.includes('/admin/');
-        const isAuthRoute = url.includes('/auth/');
         
-        // Si c'est une route d'authentification, ne pas déconnecter
-        if (isAuthRoute) {
-          throw new Error(data.message || 'Erreur d\'authentification');
-        }
-        
-        // Pour les routes admin, vérifier d'abord si l'utilisateur est toujours valide
         if (isAdminRoute) {
           const user = this.getUser();
-          if (user && user.role === 'admin') {
-            // Peut-être un faux positif, on ne déconnecte pas
-            console.warn('⚠️ 401 sur route admin mais utilisateur semble valide');
-            throw new Error('Session temporairement indisponible, réessayez');
-          }
+          console.log('👤 Utilisateur dans localStorage:', user ? 'Présent' : 'Absent');
+          
+          // Pour diagnostic, on ne déconnecte pas tout de suite
+          throw new Error('Session expirée, veuillez vous reconnecter');
         }
         
-        // Déconnexion seulement si vraiment nécessaire
-        console.log('🔑 Token invalide, déconnexion');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
