@@ -52,7 +52,7 @@ export default function Admin({ user }) {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // ✅ Force le re-rendu
+  const [refreshKey, setRefreshKey] = useState(0);
   const audioRef = useRef(null);
   const isMobile = useRef(false);
 
@@ -109,29 +109,23 @@ export default function Admin({ user }) {
     audioRef.current.play().catch(() => {});
   };
 
-  // ✅ Fonction de chargement avec timestamp et en-têtes anti-cache
+  // ✅ FONCTION CORRIGÉE - Sans headers personnalisés
   const loadPendingPosts = async (forceRefresh = false) => {
     try {
       setIsRefreshing(true);
       
-      // Timestamp et headers anti-cache
       const timestamp = Date.now();
       const url = `/admin/posts/pending?_=${timestamp}`;
       
       console.log("📡 Chargement des posts en attente...", url);
       
-      // Appel API avec headers anti-cache
-      const pendingRes = await api.get(url, {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
+      // ✅ IMPORTANT: Ne pas ajouter de headers personnalisés
+      // Utiliser simplement api.get(url) qui gère déjà le token
+      const pendingRes = await api.get(url);
       
       console.log("📦 Posts reçus:", pendingRes.length);
       
-      // Notification sonore
+      // Notification sonore si nouveau post
       if (pendingRes.length > lastNotificationCount && pendingRes.length > 0) {
         playNotificationSound();
         
@@ -150,7 +144,6 @@ export default function Admin({ user }) {
       setLastNotificationCount(pendingRes.length);
       setPendingPosts(pendingRes);
       
-      // Force le re-rendu sur mobile
       if (isMobile.current) {
         setRefreshKey(prev => prev + 1);
       }
@@ -162,7 +155,7 @@ export default function Admin({ user }) {
     }
   };
 
-  // ✅ Initialisation avec intervalle plus court sur mobile
+  // ✅ Initialisation
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -178,12 +171,11 @@ export default function Admin({ user }) {
 
     loadDashboardData();
     
-    // Intervalle de rafraîchissement PLUS COURT sur mobile (1.5s au lieu de 3s)
     const intervalTime = isMobile.current ? 1500 : 3000;
     const interval = setInterval(() => loadPendingPosts(true), intervalTime);
     
     return () => clearInterval(interval);
-  }, [user, refreshKey]); // refreshKey force le re-rendu
+  }, [user, refreshKey]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -225,10 +217,7 @@ export default function Admin({ user }) {
   const handleApprovePost = async (postId) => {
     try {
       await api.put(`/admin/posts/${postId}/approve`);
-      
-      // Recharger immédiatement
       await loadPendingPosts(true);
-      
       setSuccess("✅ Publication approuvée !");
       setTimeout(() => setSuccess(""), 3000);
       playNotificationSound();
@@ -298,7 +287,7 @@ export default function Admin({ user }) {
   }
 
   return (
-    <div className={styles.adminContainer} key={refreshKey}> {/* ✅ Force le re-rendu */}
+    <div className={styles.adminContainer} key={refreshKey}>
       <div className={styles.adminHeader}>
         <h1 className={styles.adminTitle}>Administration</h1>
         
