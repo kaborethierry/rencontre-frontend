@@ -12,7 +12,6 @@ import ReportIcon from "@mui/icons-material/Report";
 import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -20,26 +19,26 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import HomeIcon from "@mui/icons-material/Home";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ReplyIcon from "@mui/icons-material/Reply";
 import WarningIcon from "@mui/icons-material/Warning";
-import ImageIcon from "@mui/icons-material/Image";
 import PersonIcon from "@mui/icons-material/Person";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import ArticleIcon from "@mui/icons-material/Article";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 
 export default function Admin({ user }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
-  const [posts, setPosts] = useState([]);
   const [pendingPosts, setPendingPosts] = useState([]);
   const [reports, setReports] = useState([]);
   const [conversations, setConversations] = useState([]);
@@ -49,13 +48,10 @@ export default function Admin({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [onlineUsers, setOnlineUsers] = useState(0);
   const [imageErrors, setImageErrors] = useState({});
-  const [notifications, setNotifications] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [permission, setPermission] = useState('default');
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
   const audioRef = useRef(null);
 
-  // ✅ CORRECTION: Utiliser le paramètre d'onglet de l'URL
   useEffect(() => {
     const { tab } = router.query;
     if (tab && ['dashboard', 'users', 'posts', 'reports', 'messages', 'contact'].includes(tab)) {
@@ -94,39 +90,9 @@ export default function Admin({ user }) {
     audioRef.current.play().catch(() => {});
   };
 
-  useEffect(() => {
-    const subscribeToPush = async () => {
-      if ('Notification' in window && 'serviceWorker' in navigator) {
-        try {
-          const permission = await Notification.requestPermission();
-          setPermission(permission);
-          
-          if (permission === 'granted') {
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: 'BPvQSeODcyM1HeCsscthJxdqTVZVZvuRcTz9r89tqJfvbN1AN2S2UaLgxjF8eET__Plbx4b18qUGH-APE3xN92o'
-            });
-            
-            await api.post('/notifications/subscribe', { 
-              subscription: subscription.toJSON() 
-            });
-          }
-        } catch (error) {
-          console.error("Erreur subscription:", error);
-        }
-      }
-    };
-    
-    subscribeToPush();
-  }, []);
-
-  // ✅ CORRECTION: Fonction spécifique pour charger les posts en attente
   const loadPendingPosts = async () => {
     try {
-      console.log("Chargement des posts en attente...");
       const pendingRes = await api.get('/admin/posts/pending');
-      console.log("Posts en attente reçus:", pendingRes);
       
       if (pendingRes.length > lastNotificationCount && pendingRes.length > 0) {
         playNotificationSound();
@@ -158,27 +124,22 @@ export default function Admin({ user }) {
     }
 
     if (!user) return;
-
     if (user.role !== 'admin') {
       router.push('/');
       return;
     }
 
     loadDashboardData();
-    
-    // ✅ CORRECTION: Charger les posts en attente toutes les 5 secondes
     const interval = setInterval(loadPendingPosts, 5000);
-    
     return () => clearInterval(interval);
   }, [user]);
 
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsRes, usersRes, postsRes, reportsRes, convRes, contactRes] = await Promise.all([
+      const [statsRes, usersRes, reportsRes, convRes, contactRes] = await Promise.all([
         api.get('/admin/dashboard'),
         api.get('/admin/users'),
-        api.get('/admin/posts'),
         api.get('/admin/reports'),
         api.get('/admin/conversations'),
         api.get('/admin/contact-messages')
@@ -186,7 +147,6 @@ export default function Admin({ user }) {
 
       setStats(statsRes);
       setUsers(usersRes || []);
-      setPosts(postsRes || []);
       setReports(reportsRes || []);
       setConversations(convRes || []);
       setContactMessages(contactRes || []);
@@ -200,7 +160,6 @@ export default function Admin({ user }) {
       }).length;
       setOnlineUsers(online);
 
-      // ✅ CORRECTION: Charger les posts en attente immédiatement
       await loadPendingPosts();
       
     } catch (error) {
@@ -211,17 +170,28 @@ export default function Admin({ user }) {
     }
   };
 
-  const loadConversationMessages = async (conversationId) => {
-    if (conversationMessages[conversationId]) return;
-    
+  const handleApprovePost = async (postId) => {
     try {
-      const messages = await api.get(`/admin/conversations/${conversationId}/messages`);
-      setConversationMessages(prev => ({
-        ...prev,
-        [conversationId]: messages || []
-      }));
+      await api.put(`/admin/posts/${postId}/approve`);
+      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
+      setSuccess("✅ Publication approuvée avec succès !");
+      setTimeout(() => setSuccess(""), 3000);
+      playNotificationSound();
     } catch (error) {
-      console.error("Erreur chargement messages:", error);
+      console.error("❌ Erreur approbation:", error);
+      setError("Erreur lors de l'approbation");
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (!confirm("Voulez-vous vraiment rejeter cette publication ?")) return;
+    try {
+      await api.delete(`/admin/posts/${postId}`);
+      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
+      setSuccess("🗑️ Publication rejetée");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (error) {
+      console.error("❌ Erreur suppression post:", error);
     }
   };
 
@@ -246,30 +216,6 @@ export default function Admin({ user }) {
     }
   };
 
-  const handleDeletePost = async (postId) => {
-    if (!confirm("Supprimer cette publication ?")) return;
-    try {
-      await api.delete(`/admin/posts/${postId}`);
-      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
-      setSuccess("Publication supprimée");
-    } catch (error) {
-      console.error("Erreur suppression post:", error);
-    }
-  };
-
-  const handleApprovePost = async (postId) => {
-    try {
-      console.log("Approbation du post:", postId);
-      await api.put(`/admin/posts/${postId}/approve`);
-      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
-      setSuccess("Publication approuvée !");
-      playNotificationSound();
-    } catch (error) {
-      console.error("❌ Erreur approbation:", error);
-      setError("Erreur lors de l'approbation");
-    }
-  };
-
   const handleResolveReport = async (reportId, action) => {
     try {
       await api.put(`/admin/reports/${reportId}/resolve`, { 
@@ -282,23 +228,6 @@ export default function Admin({ user }) {
     } catch (error) {
       console.error("Erreur traitement signalement:", error);
     }
-  };
-
-  const handleViewConversation = async (conversation) => {
-    if (selectedConversation?.id === conversation.id) {
-      setSelectedConversation(null);
-    } else {
-      setSelectedConversation(conversation);
-      await loadConversationMessages(conversation.id);
-    }
-  };
-
-  const handleBackToSite = () => {
-    router.push('/');
-  };
-
-  const handleReplyToContact = (email, subject) => {
-    window.location.href = `mailto:${email}?subject=Re: ${subject}`;
   };
 
   const filteredUsers = users.filter(u => 
@@ -340,7 +269,7 @@ export default function Admin({ user }) {
                 {soundEnabled ? <NotificationsActiveIcon /> : <NotificationsOffIcon />}
                 {totalPending > 0 && <span className={styles.notificationBadge}>{totalPending}</span>}
               </button>
-              <button onClick={handleBackToSite} className={styles.backToSiteBtn}>
+              <button onClick={() => router.push('/')} className={styles.backToSiteBtn}>
                 <HomeIcon /> Retour au site
               </button>
             </div>
@@ -425,20 +354,6 @@ export default function Admin({ user }) {
                   </div>
                 </div>
                 <div className={styles.statCard}>
-                  <ChatIcon className={styles.statIcon} />
-                  <div className={styles.statInfo}>
-                    <h3>Commentaires</h3>
-                    <p className={styles.statNumber}>{stats.totalComments}</p>
-                  </div>
-                </div>
-                <div className={styles.statCard}>
-                  <FavoriteIcon className={styles.statIcon} />
-                  <div className={styles.statInfo}>
-                    <h3>Likes</h3>
-                    <p className={styles.statNumber}>{stats.totalLikes}</p>
-                  </div>
-                </div>
-                <div className={styles.statCard}>
                   <WarningIcon className={styles.statIcon} style={{color: '#ff9800'}} />
                   <div className={styles.statInfo}>
                     <h3>Signalements</h3>
@@ -484,9 +399,6 @@ export default function Admin({ user }) {
                       <th>Ville</th>
                       <th>Rôle</th>
                       <th>Status</th>
-                      <th>Posts</th>
-                      <th>Commentaires</th>
-                      <th>Dernière connexion</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -527,11 +439,6 @@ export default function Admin({ user }) {
                             {user.isActive ? 'Actif' : 'Suspendu'}
                           </span>
                         </td>
-                        <td>{user.postsCount || 0}</td>
-                        <td>{user.commentsCount || 0}</td>
-                        <td>
-                          {user.lastLogin ? new Date(user.lastLogin).toLocaleString('fr-FR') : 'Jamais'}
-                        </td>
                         <td>
                           <button 
                             className={`${styles.actionBtn} ${user.isActive ? styles.suspendBtn : styles.activateBtn}`}
@@ -558,39 +465,76 @@ export default function Admin({ user }) {
 
           {activeTab === 'posts' && (
             <div className={styles.postsSection}>
-              <h2>Publications en attente d'approbation ({pendingPosts.length})</h2>
+              <div className={styles.postsHeader}>
+                <h2>
+                  <ArticleIcon className={styles.sectionIcon} />
+                  Publications en attente
+                  {totalPending > 0 && <span className={styles.pendingCount}>{totalPending}</span>}
+                </h2>
+                <p className={styles.postsSubtitle}>
+                  {totalPending === 0 
+                    ? "Aucune publication en attente d'approbation" 
+                    : `${totalPending} publication${totalPending > 1 ? 's' : ''} à examiner`}
+                </p>
+              </div>
               
               {pendingPosts.length === 0 ? (
                 <div className={styles.noPostsContainer}>
-                  <HourglassEmptyIcon className={styles.emptyIcon} />
+                  <div className={styles.emptyStateIcon}>
+                    <HourglassEmptyIcon />
+                  </div>
                   <p className={styles.noPosts}>Aucune publication en attente</p>
+                  <p className={styles.noPostsSubtitle}>Les nouvelles publications apparaîtront ici</p>
                 </div>
               ) : (
-                <div className={styles.pendingPostsList}>
+                <div className={styles.pendingPostsGrid}>
                   {pendingPosts.map(post => (
                     <div key={post.id} className={styles.pendingPostCard}>
-                      <div className={styles.postHeader}>
-                        <Image 
-                          src={getImageUrl(post.photo)}
-                          alt={post.prenom}
-                          width={50}
-                          height={50}
-                          className={styles.userAvatar}
-                          unoptimized
-                          onError={(e) => e.target.src = "/default-avatar.png"}
-                        />
-                        <div>
-                          <strong>{post.prenom} {post.nom}</strong>
-                          <p className={styles.postUserInfo}>
-                            {post.age} ans | {post.ville} | {post.religion}
-                          </p>
-                          <small className={styles.postDate}>
-                            {new Date(post.createdAt).toLocaleString('fr-FR')}
-                          </small>
+                      <div className={styles.postCardHeader}>
+                        <div className={styles.userInfo}>
+                          <div className={styles.userAvatarLarge}>
+                            {!imageErrors[`post-${post.id}`] ? (
+                              <Image 
+                                src={getImageUrl(post.photo)}
+                                alt={post.prenom}
+                                width={56}
+                                height={56}
+                                className={styles.userAvatarImage}
+                                onError={() => handleImageError(`post-${post.id}`)}
+                                unoptimized
+                              />
+                            ) : (
+                              <div className={styles.avatarFallbackLarge}>
+                                <PersonIcon />
+                              </div>
+                            )}
+                          </div>
+                          <div className={styles.userDetails}>
+                            <h3 className={styles.userName}>{post.prenom} {post.nom}</h3>
+                            <div className={styles.userMeta}>
+                              <span className={styles.userMetaItem}>
+                                <span className={styles.metaLabel}>Âge:</span> {post.age}
+                              </span>
+                              <span className={styles.userMetaItem}>
+                                <span className={styles.metaLabel}>Ville:</span> {post.ville}
+                              </span>
+                              <span className={styles.userMetaItem}>
+                                <span className={styles.metaLabel}>Religion:</span> {post.religion}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className={styles.postTimeBadge}>
+                          <ScheduleIcon className={styles.timeIcon} />
+                          <span>{new Date(post.createdAt).toLocaleString('fr-FR')}</span>
                         </div>
                       </div>
-                      <p className={styles.postContent}>{post.content}</p>
-                      <div className={styles.postActions}>
+                      
+                      <div className={styles.postContent}>
+                        <p>"{post.content}"</p>
+                      </div>
+                      
+                      <div className={styles.postCardFooter}>
                         <button 
                           className={styles.approveBtn}
                           onClick={() => handleApprovePost(post.id)}
@@ -732,7 +676,7 @@ export default function Admin({ user }) {
                   <div key={conv.id} className={styles.conversationWrapper}>
                     <div 
                       className={`${styles.conversationCard} ${selectedConversation?.id === conv.id ? styles.selected : ''}`}
-                      onClick={() => handleViewConversation(conv)}
+                      onClick={() => setSelectedConversation(selectedConversation?.id === conv.id ? null : conv)}
                     >
                       <div className={styles.conversationHeader}>
                         <div className={styles.conversationUsers}>
@@ -807,20 +751,7 @@ export default function Admin({ user }) {
                               </div>
                               <div className={styles.messageBubble}>
                                 <strong>{msg.prenom} {msg.nom}</strong>
-                                {msg.type === 'image' ? (
-                                  <div className={styles.messageImageContainer}>
-                                    <Image 
-                                      src={msg.image}
-                                      alt="Image du message"
-                                      width={200}
-                                      height={200}
-                                      className={styles.messageImage}
-                                      unoptimized
-                                    />
-                                  </div>
-                                ) : (
-                                  <p>{msg.content}</p>
-                                )}
+                                <p>{msg.content}</p>
                                 <small>{new Date(msg.createdAt).toLocaleString('fr-FR')}</small>
                               </div>
                             </div>
@@ -858,7 +789,7 @@ export default function Admin({ user }) {
                       </span>
                       <button 
                         className={styles.replyBtn}
-                        onClick={() => handleReplyToContact(msg.email, msg.subject)}
+                        onClick={() => window.location.href = `mailto:${msg.email}?subject=Re: ${msg.subject}`}
                       >
                         <ReplyIcon /> Répondre
                       </button>
