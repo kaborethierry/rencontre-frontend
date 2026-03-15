@@ -55,7 +55,6 @@ export default function Admin({ user }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const audioRef = useRef(null);
   const isMobile = useRef(false);
-  const notificationTimeout = useRef(null);
 
   // Détecter si c'est un mobile
   useEffect(() => {
@@ -106,50 +105,8 @@ export default function Admin({ user }) {
 
   const playNotificationSound = () => {
     if (!soundEnabled || !audioRef.current) return;
-    
-    // Éviter les sons en cascade
-    if (notificationTimeout.current) {
-      clearTimeout(notificationTimeout.current);
-    }
-    
-    notificationTimeout.current = setTimeout(() => {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
-    }, 500);
-  };
-
-  // ✅ Fonction de chargement des messages d'une conversation
-  const loadConversationMessages = async (conversationId) => {
-    try {
-      if (conversationMessages[conversationId]) {
-        const conv = conversations.find(c => c.id === conversationId);
-        setSelectedConversation(conv);
-        return;
-      }
-      
-      console.log("📡 Chargement des messages pour la conversation:", conversationId);
-      const messages = await api.get(`/admin/conversations/${conversationId}/messages`);
-      
-      setConversationMessages(prev => ({
-        ...prev,
-        [conversationId]: messages || []
-      }));
-      
-      const conv = conversations.find(c => c.id === conversationId);
-      setSelectedConversation(conv);
-      
-    } catch (error) {
-      console.error("❌ Erreur chargement messages:", error);
-    }
-  };
-
-  // ✅ Gestion du clic sur une conversation
-  const handleViewConversation = (conversation) => {
-    if (selectedConversation?.id === conversation.id) {
-      setSelectedConversation(null);
-    } else {
-      loadConversationMessages(conversation.id);
-    }
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().catch(() => {});
   };
 
   // ✅ FONCTION CORRIGÉE - Sans headers personnalisés
@@ -162,11 +119,13 @@ export default function Admin({ user }) {
       
       console.log("📡 Chargement des posts en attente...", url);
       
+      // ✅ IMPORTANT: Ne pas ajouter de headers personnalisés
+      // Utiliser simplement api.get(url) qui gère déjà le token
       const pendingRes = await api.get(url);
       
       console.log("📦 Posts reçus:", pendingRes.length);
       
-      // ✅ Notification uniquement si nouveau post ET pas de son récent
+      // Notification sonore si nouveau post
       if (pendingRes.length > lastNotificationCount && pendingRes.length > 0) {
         playNotificationSound();
         
@@ -212,16 +171,10 @@ export default function Admin({ user }) {
 
     loadDashboardData();
     
-    // ✅ Intervalle plus long sur mobile pour éviter les sons excessifs
-    const intervalTime = isMobile.current ? 5000 : 3000;
+    const intervalTime = isMobile.current ? 1500 : 3000;
     const interval = setInterval(() => loadPendingPosts(true), intervalTime);
     
-    return () => {
-      clearInterval(interval);
-      if (notificationTimeout.current) {
-        clearTimeout(notificationTimeout.current);
-      }
-    };
+    return () => clearInterval(interval);
   }, [user, refreshKey]);
 
   const loadDashboardData = async () => {
@@ -267,6 +220,7 @@ export default function Admin({ user }) {
       await loadPendingPosts(true);
       setSuccess("✅ Publication approuvée !");
       setTimeout(() => setSuccess(""), 3000);
+      playNotificationSound();
     } catch (error) {
       console.error("❌ Erreur approbation:", error);
       setError("Erreur lors de l'approbation");
@@ -776,7 +730,7 @@ export default function Admin({ user }) {
                   <div key={conv.id} className={styles.conversationWrapper}>
                     <div 
                       className={`${styles.conversationCard} ${selectedConversation?.id === conv.id ? styles.selected : ''}`}
-                      onClick={() => handleViewConversation(conv)}
+                      onClick={() => setSelectedConversation(selectedConversation?.id === conv.id ? null : conv)}
                     >
                       <div className={styles.conversationHeader}>
                         <div className={styles.conversationUsers}>
@@ -851,20 +805,7 @@ export default function Admin({ user }) {
                               </div>
                               <div className={styles.messageBubble}>
                                 <strong>{msg.prenom} {msg.nom}</strong>
-                                {msg.type === 'image' ? (
-                                  <div className={styles.messageImageContainer}>
-                                    <Image 
-                                      src={msg.image}
-                                      alt="Image du message"
-                                      width={200}
-                                      height={200}
-                                      className={styles.messageImage}
-                                      unoptimized
-                                    />
-                                  </div>
-                                ) : (
-                                  <p>{msg.content}</p>
-                                )}
+                                <p>{msg.content}</p>
                                 <small>{new Date(msg.createdAt).toLocaleString('fr-FR')}</small>
                               </div>
                             </div>
