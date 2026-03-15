@@ -57,36 +57,11 @@ export default function Admin({ user }) {
   const isMobile = useRef(false);
   const notificationTimeout = useRef(null);
 
-  // ✅ Détection mobile améliorée
+  // Détecter si c'est un mobile
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const checkMobile = () => {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        
-        // Tests pour différents types de mobiles
-        const isAndroid = /android/i.test(userAgent);
-        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-        const isWindowsPhone = /windows phone/i.test(userAgent);
-        const isBlackberry = /blackberry/i.test(userAgent);
-        const isMobileDevice = /Mobile|mobile|Mobi/i.test(userAgent);
-        const isSmallScreen = window.innerWidth <= 768;
-        
-        isMobile.current = isAndroid || isIOS || isWindowsPhone || isBlackberry || isMobileDevice || isSmallScreen;
-        
-        console.log("📱 User Agent:", userAgent);
-        console.log("📱 Android:", isAndroid);
-        console.log("📱 iOS:", isIOS);
-        console.log("📱 Windows Phone:", isWindowsPhone);
-        console.log("📱 Mobile Device:", isMobileDevice);
-        console.log("📱 Small Screen:", isSmallScreen);
-        console.log("📱 Mobile détecté (final):", isMobile.current);
-      };
-      
-      checkMobile();
-      
-      // Réagir au redimensionnement
-      window.addEventListener('resize', checkMobile);
-      return () => window.removeEventListener('resize', checkMobile);
+      isMobile.current = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      console.log("📱 Mobile détecté:", isMobile.current);
     }
   }, []);
 
@@ -132,6 +107,7 @@ export default function Admin({ user }) {
   const playNotificationSound = () => {
     if (!soundEnabled || !audioRef.current) return;
     
+    // Éviter les sons en cascade
     if (notificationTimeout.current) {
       clearTimeout(notificationTimeout.current);
     }
@@ -142,6 +118,7 @@ export default function Admin({ user }) {
     }, 500);
   };
 
+  // ✅ Fonction de chargement des messages d'une conversation
   const loadConversationMessages = async (conversationId) => {
     try {
       if (conversationMessages[conversationId]) {
@@ -166,6 +143,7 @@ export default function Admin({ user }) {
     }
   };
 
+  // ✅ Gestion du clic sur une conversation
   const handleViewConversation = (conversation) => {
     if (selectedConversation?.id === conversation.id) {
       setSelectedConversation(null);
@@ -174,6 +152,7 @@ export default function Admin({ user }) {
     }
   };
 
+  // ✅ FONCTION CORRIGÉE - Sans headers personnalisés
   const loadPendingPosts = async (forceRefresh = false) => {
     try {
       setIsRefreshing(true);
@@ -187,6 +166,7 @@ export default function Admin({ user }) {
       
       console.log("📦 Posts reçus:", pendingRes.length);
       
+      // ✅ Notification uniquement si nouveau post ET pas de son récent
       if (pendingRes.length > lastNotificationCount && pendingRes.length > 0) {
         playNotificationSound();
         
@@ -216,6 +196,7 @@ export default function Admin({ user }) {
     }
   };
 
+  // ✅ Initialisation
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -231,6 +212,7 @@ export default function Admin({ user }) {
 
     loadDashboardData();
     
+    // ✅ Intervalle plus long sur mobile pour éviter les sons excessifs
     const intervalTime = isMobile.current ? 5000 : 3000;
     const interval = setInterval(() => loadPendingPosts(true), intervalTime);
     
@@ -278,6 +260,7 @@ export default function Admin({ user }) {
     }
   };
 
+  // ✅ Approbation avec rechargement immédiat
   const handleApprovePost = async (postId) => {
     try {
       await api.put(`/admin/posts/${postId}/approve`);
