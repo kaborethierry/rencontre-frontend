@@ -11,7 +11,6 @@ class ApiService {
     console.log('📡 ApiService initialisé avec baseURL:', this.baseURL);
   }
 
-  // ... le reste du code reste identique ...
   getToken() {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('token');
@@ -27,9 +26,10 @@ class ApiService {
     return null;
   }
 
-  getHeaders() {
+  getHeaders(extraHeaders = {}) {
     const headers = {
       'Content-Type': 'application/json',
+      ...extraHeaders
     };
     
     const token = this.getToken();
@@ -81,10 +81,24 @@ class ApiService {
     return data;
   }
 
-  async get(endpoint) {
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
+  // ✅ GET avec headers anti-cache pour mobile
+  async get(endpoint, options = {}) {
+    // Headers anti-cache pour mobile
+    const cacheHeaders = {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    };
+    
+    // Ajouter un timestamp à l'URL si ce n'est pas déjà fait
+    const url = endpoint.includes('?') 
+      ? `${endpoint}&_=${Date.now()}` 
+      : `${endpoint}?_=${Date.now()}`;
+    
+    const response = await fetch(`${this.baseURL}${url}`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers: this.getHeaders(cacheHeaders),
+      ...options
     });
     return this.handleResponse(response);
   }
