@@ -80,16 +80,19 @@ class ApiService {
     return data;
   }
 
-  // ✅ GET avec timestamp uniquement (pas de headers supplémentaires)
+  // ✅ GET avec timestamp dans l'URL - SANS headers supplémentaires
   async get(endpoint, options = {}) {
-    // Ajouter un timestamp à l'URL pour éviter le cache
-    const url = endpoint.includes('?') 
-      ? `${endpoint}&_=${Date.now()}` 
-      : `${endpoint}?_=${Date.now()}`;
+    // Nettoyer l'endpoint des paramètres existants
+    const baseEndpoint = endpoint.split('?')[0];
+    
+    // Construire l'URL avec timestamp
+    const url = `${baseEndpoint}?_=${Date.now()}`;
+    
+    console.log(`📡 GET: ${url}`);
     
     const response = await fetch(`${this.baseURL}${url}`, {
       method: 'GET',
-      headers: this.getHeaders(), // Uniquement les headers standards
+      headers: this.getHeaders(), // UNIQUEMENT Content-Type et Authorization
       ...options
     });
     return this.handleResponse(response);
