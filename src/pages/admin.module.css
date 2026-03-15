@@ -1012,3 +1012,88 @@
     transform: translateY(0);
   }
 }
+
+/* Animation pour les nouvelles notifications */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(255, 105, 180, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 105, 180, 0);
+  }
+}
+
+.hasNotification {
+  animation: pulse 2s infinite;
+  background: linear-gradient(135deg, #FF69B4, #FF1493) !important;
+}
+
+/* Amélioration responsive pour les posts en attente */
+@media (max-width: 768px) {
+  .pendingPostCard {
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .postHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .postHeader img {
+    margin: 0 auto;
+  }
+
+  .postActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .approveBtn, .rejectBtn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statCard {
+    padding: 15px;
+  }
+
+  .statNumber {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcomeBanner {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .notificationBtn, .backToSiteBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .postContent {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+}

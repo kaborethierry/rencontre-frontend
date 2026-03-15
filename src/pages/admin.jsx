@@ -55,6 +55,14 @@ export default function Admin({ user }) {
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
   const audioRef = useRef(null);
 
+  // ✅ CORRECTION: Utiliser le paramètre d'onglet de l'URL
+  useEffect(() => {
+    const { tab } = router.query;
+    if (tab && ['dashboard', 'users', 'posts', 'reports', 'messages', 'contact'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [router.query]);
+
   const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
       if (window.location.hostname.includes('rencontreauthentique.org')) {
@@ -113,11 +121,14 @@ export default function Admin({ user }) {
     subscribeToPush();
   }, []);
 
+  // ✅ CORRECTION: Fonction spécifique pour charger les posts en attente
   const loadPendingPosts = async () => {
     try {
+      console.log("Chargement des posts en attente...");
       const pendingRes = await api.get('/admin/posts/pending');
+      console.log("Posts en attente reçus:", pendingRes);
       
-      if (pendingRes.length > lastNotificationCount) {
+      if (pendingRes.length > lastNotificationCount && pendingRes.length > 0) {
         playNotificationSound();
         
         if ('Notification' in window && Notification.permission === 'granted') {
@@ -135,7 +146,7 @@ export default function Admin({ user }) {
       setLastNotificationCount(pendingRes.length);
       setPendingPosts(pendingRes);
     } catch (error) {
-      console.error("Erreur chargement posts:", error);
+      console.error("❌ Erreur chargement posts en attente:", error);
     }
   };
 
@@ -155,7 +166,8 @@ export default function Admin({ user }) {
 
     loadDashboardData();
     
-    const interval = setInterval(loadPendingPosts, 10000);
+    // ✅ CORRECTION: Charger les posts en attente toutes les 5 secondes
+    const interval = setInterval(loadPendingPosts, 5000);
     
     return () => clearInterval(interval);
   }, [user]);
@@ -188,10 +200,11 @@ export default function Admin({ user }) {
       }).length;
       setOnlineUsers(online);
 
+      // ✅ CORRECTION: Charger les posts en attente immédiatement
       await loadPendingPosts();
       
     } catch (error) {
-      console.error("Erreur chargement admin:", error);
+      console.error("❌ Erreur chargement admin:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -238,6 +251,7 @@ export default function Admin({ user }) {
     try {
       await api.delete(`/admin/posts/${postId}`);
       setPendingPosts(pendingPosts.filter(p => p.id !== postId));
+      setSuccess("Publication supprimée");
     } catch (error) {
       console.error("Erreur suppression post:", error);
     }
@@ -245,11 +259,14 @@ export default function Admin({ user }) {
 
   const handleApprovePost = async (postId) => {
     try {
+      console.log("Approbation du post:", postId);
       await api.put(`/admin/posts/${postId}/approve`);
       setPendingPosts(pendingPosts.filter(p => p.id !== postId));
+      setSuccess("Publication approuvée !");
       playNotificationSound();
     } catch (error) {
-      console.error("Erreur approbation:", error);
+      console.error("❌ Erreur approbation:", error);
+      setError("Erreur lors de l'approbation");
     }
   };
 
@@ -332,6 +349,7 @@ export default function Admin({ user }) {
       </div>
 
       {error && <div className={styles.errorMessage}>{error}</div>}
+      {success && <div className={styles.successMessage}>{success}</div>}
 
       <div className={styles.adminLayout}>
         <div className={styles.sidebar}>
@@ -540,12 +558,16 @@ export default function Admin({ user }) {
 
           {activeTab === 'posts' && (
             <div className={styles.postsSection}>
-              <h2>Publications en attente ({pendingPosts.length})</h2>
-              <div className={styles.pendingPostsList}>
-                {pendingPosts.length === 0 ? (
+              <h2>Publications en attente d'approbation ({pendingPosts.length})</h2>
+              
+              {pendingPosts.length === 0 ? (
+                <div className={styles.noPostsContainer}>
+                  <HourglassEmptyIcon className={styles.emptyIcon} />
                   <p className={styles.noPosts}>Aucune publication en attente</p>
-                ) : (
-                  pendingPosts.map(post => (
+                </div>
+              ) : (
+                <div className={styles.pendingPostsList}>
+                  {pendingPosts.map(post => (
                     <div key={post.id} className={styles.pendingPostCard}>
                       <div className={styles.postHeader}>
                         <Image 
@@ -555,11 +577,16 @@ export default function Admin({ user }) {
                           height={50}
                           className={styles.userAvatar}
                           unoptimized
+                          onError={(e) => e.target.src = "/default-avatar.png"}
                         />
                         <div>
                           <strong>{post.prenom} {post.nom}</strong>
-                          <p>{post.age} ans | {post.ville} | {post.religion}</p>
-                          <small>{new Date(post.createdAt).toLocaleString('fr-FR')}</small>
+                          <p className={styles.postUserInfo}>
+                            {post.age} ans | {post.ville} | {post.religion}
+                          </p>
+                          <small className={styles.postDate}>
+                            {new Date(post.createdAt).toLocaleString('fr-FR')}
+                          </small>
                         </div>
                       </div>
                       <p className={styles.postContent}>{post.content}</p>
@@ -578,9 +605,9 @@ export default function Admin({ user }) {
                         </button>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

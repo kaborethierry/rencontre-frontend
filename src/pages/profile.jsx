@@ -31,7 +31,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [postMessage, setPostMessage] = useState("");
 
-  // ✅ URL de base dynamique
+  // URL de base dynamique
   const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
       if (window.location.hostname.includes('rencontreauthentique.org')) {
@@ -66,7 +66,9 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
         localStorage.setItem('user', JSON.stringify(profileRes));
         if (setPropUser) setPropUser(profileRes);
         
+        // ✅ CORRECTION: Charger les posts de l'utilisateur avec leur statut
         const postsRes = await api.get(`/posts/user/${profileRes.id}`);
+        console.log("Posts chargés:", postsRes);
         setPosts(postsRes || []);
         
       } catch (error) {
@@ -138,7 +140,17 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
 
     try {
       const response = await api.post('/posts', { content: newPost });
-      setPosts([response, ...posts]);
+      
+      // ✅ CORRECTION: Ajouter le nouveau post avec le bon statut
+      const newPostWithStatus = {
+        ...response,
+        status: response.isApproved ? 'approved' : 'pending',
+        message: response.isApproved 
+          ? '✅ Publication approuvée' 
+          : '⏳ En attente d\'approbation par l\'administrateur'
+      };
+      
+      setPosts([newPostWithStatus, ...posts]);
       setNewPost("");
       setPostMessage("✅ Publication envoyée ! Elle sera visible après approbation de l'administrateur.");
       setTimeout(() => setPostMessage(""), 5000);
@@ -328,7 +340,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
       <div className={styles.feed}>
         <h3>Mes publications ({posts.length})</h3>
         {posts.map((post) => (
-          <div key={post.id} className={`${styles.postCard} ${post.status === 'pending' ? styles.pendingPost : ''}`}>
+          <div key={post.id} className={`${styles.postCard} ${post.isApproved === 0 ? styles.pendingPost : ''}`}>
             <div className={styles.postHeader}>
               <Image 
                 src={getImageUrl(user?.photo)}
@@ -353,7 +365,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
             <p className={styles.postContent}>{post.content}</p>
 
             <div className={styles.postStatus}>
-              {post.status === 'pending' ? (
+              {post.isApproved === 0 ? (
                 <div className={styles.pendingStatus}>
                   <HourglassEmptyIcon /> En attente d'approbation
                 </div>
