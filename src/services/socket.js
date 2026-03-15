@@ -8,6 +8,7 @@ class SocketService {
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
+    this.pendingMessages = new Map(); // Pour tracker les messages envoyés
   }
 
   // Connecter le socket
@@ -85,7 +86,20 @@ class SocketService {
 
     this.socket.on('message-error', (data) => {
       console.error('❌ Erreur message:', data.error);
+      // Retirer des messages en attente
+      if (data.clientId) {
+        this.pendingMessages.delete(data.clientId);
+      }
       this.triggerCallbacks('message-error', data);
+    });
+
+    this.socket.on('message-sent', (data) => {
+      console.log('✅ Message envoyé (confirmation):', data.id);
+      // Retirer des messages en attente
+      if (data.clientId) {
+        this.pendingMessages.delete(data.clientId);
+      }
+      this.triggerCallbacks('message-sent', data);
     });
 
     this.socket.on('new-notification', (data) => {
@@ -110,13 +124,8 @@ class SocketService {
     });
 
     this.socket.on('receive-message', (data) => {
-      console.log('📨 Message reçu:', data);
+      console.log('📨 Message reçu:', data.id);
       this.triggerCallbacks('receive-message', data);
-    });
-
-    this.socket.on('message-sent', (data) => {
-      console.log('✅ Message envoyé:', data);
-      this.triggerCallbacks('message-sent', data);
     });
 
     this.socket.on('user-typing', (data) => {
@@ -135,6 +144,7 @@ class SocketService {
       this.socket = null;
       this.isConnected = false;
       this.listeners.clear();
+      this.pendingMessages.clear();
       console.log('🔌 Socket déconnecté manuellement');
     }
   }
@@ -150,7 +160,17 @@ class SocketService {
     }
 
     try {
-      this.socket.emit('send-message', data);
+      // ✅ Ajouter un clientId unique pour éviter les doublons
+      const clientId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const messageData = { ...data, clientId };
+      
+      // Stocker le message en attente
+      this.pendingMessages.set(clientId, messageData);
+      
+      // Nettoyer après 5 secondes
+      setTimeout(() => this.pendingMessages.delete(clientId), 5000);
+      
+      this.socket.emit('send-message', messageData);
       return true;
     } catch (error) {
       console.error('❌ Erreur envoi message:', error);
