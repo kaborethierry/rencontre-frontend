@@ -1163,3 +1163,60 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Ajouter à la fin du fichier admin.module.css */
+
+.refreshBtn {
+  background: #0A1F44;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  margin-left: auto;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #1a2f5a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(10,31,68,0.3);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.postsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.postsHeader .headerActions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}

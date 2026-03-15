@@ -30,6 +30,7 @@ import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import ArticleIcon from "@mui/icons-material/Article";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 export default function Admin({ user }) {
   const router = useRouter();
@@ -50,12 +51,24 @@ export default function Admin({ user }) {
   const [imageErrors, setImageErrors] = useState({});
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const audioRef = useRef(null);
 
+  // ✅ Gestion de l'approbation via URL (quand on clique sur la notification)
   useEffect(() => {
-    const { tab } = router.query;
+    const { approve, tab } = router.query;
+    
+    // Changer l'onglet si spécifié
     if (tab && ['dashboard', 'users', 'posts', 'reports', 'messages', 'contact'].includes(tab)) {
       setActiveTab(tab);
+    }
+    
+    // Approuver automatiquement si un postId est passé
+    if (approve) {
+      handleApprovePost(parseInt(approve));
+      
+      // Nettoyer l'URL sans recharger la page
+      router.replace('/admin?tab=posts', undefined, { shallow: true });
     }
   }, [router.query]);
 
@@ -90,10 +103,20 @@ export default function Admin({ user }) {
     audioRef.current.play().catch(() => {});
   };
 
-  const loadPendingPosts = async () => {
+  // ✅ Fonction de chargement des posts avec timestamp pour éviter le cache
+  const loadPendingPosts = async (forceRefresh = false) => {
     try {
-      const pendingRes = await api.get('/admin/posts/pending');
+      setIsRefreshing(true);
       
+      // Ajouter un timestamp pour éviter le cache sur mobile
+      const url = forceRefresh 
+        ? `/admin/posts/pending?t=${Date.now()}` 
+        : '/admin/posts/pending';
+        
+      const pendingRes = await api.get(url);
+      console.log("📦 Posts en attente reçus:", pendingRes.length);
+      
+      // Notification sonore si nouveau post
       if (pendingRes.length > lastNotificationCount && pendingRes.length > 0) {
         playNotificationSound();
         
@@ -113,9 +136,12 @@ export default function Admin({ user }) {
       setPendingPosts(pendingRes);
     } catch (error) {
       console.error("❌ Erreur chargement posts en attente:", error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
+  // ✅ Initialisation et intervalle de rafraîchissement
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -130,9 +156,11 @@ export default function Admin({ user }) {
     }
 
     loadDashboardData();
-    const interval = setInterval(loadPendingPosts, 5000);
+    
+    // Rafraîchir toutes les 3 secondes (plus rapide pour mobile)
+    const interval = setInterval(() => loadPendingPosts(true), 3000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, router.query.tab]); // Dépend de l'onglet pour recharger si besoin
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -160,7 +188,8 @@ export default function Admin({ user }) {
       }).length;
       setOnlineUsers(online);
 
-      await loadPendingPosts();
+      // Charger les posts en attente
+      await loadPendingPosts(true);
       
     } catch (error) {
       console.error("❌ Erreur chargement admin:", error);
@@ -170,10 +199,14 @@ export default function Admin({ user }) {
     }
   };
 
+  // ✅ Fonction d'approbation avec rechargement immédiat
   const handleApprovePost = async (postId) => {
     try {
       await api.put(`/admin/posts/${postId}/approve`);
-      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
+      
+      // Recharger immédiatement les posts après approbation
+      await loadPendingPosts(true);
+      
       setSuccess("✅ Publication approuvée avec succès !");
       setTimeout(() => setSuccess(""), 3000);
       playNotificationSound();
@@ -183,11 +216,15 @@ export default function Admin({ user }) {
     }
   };
 
+  // ✅ Fonction de rejet avec rechargement immédiat
   const handleDeletePost = async (postId) => {
     if (!confirm("Voulez-vous vraiment rejeter cette publication ?")) return;
     try {
       await api.delete(`/admin/posts/${postId}`);
-      setPendingPosts(pendingPosts.filter(p => p.id !== postId));
+      
+      // Recharger immédiatement les posts après rejet
+      await loadPendingPosts(true);
+      
       setSuccess("🗑️ Publication rejetée");
       setTimeout(() => setSuccess(""), 3000);
     } catch (error) {
@@ -471,11 +508,21 @@ export default function Admin({ user }) {
                   Publications en attente
                   {totalPending > 0 && <span className={styles.pendingCount}>{totalPending}</span>}
                 </h2>
-                <p className={styles.postsSubtitle}>
-                  {totalPending === 0 
-                    ? "Aucune publication en attente d'approbation" 
-                    : `${totalPending} publication${totalPending > 1 ? 's' : ''} à examiner`}
-                </p>
+                <div className={styles.headerActions}>
+                  <button 
+                    className={styles.refreshBtn}
+                    onClick={() => loadPendingPosts(true)}
+                    disabled={isRefreshing}
+                  >
+                    <RefreshIcon className={isRefreshing ? styles.spinning : ''} />
+                    {isRefreshing ? 'Rafraîchissement...' : 'Rafraîchir'}
+                  </button>
+                  <p className={styles.postsSubtitle}>
+                    {totalPending === 0 
+                      ? "Aucune publication en attente d'approbation" 
+                      : `${totalPending} publication${totalPending > 1 ? 's' : ''} à examiner`}
+                  </p>
+                </div>
               </div>
               
               {pendingPosts.length === 0 ? (
