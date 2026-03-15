@@ -5,11 +5,51 @@ import Navbar from "../components/Navbar/Navbar";
 import Head from "next/head";
 import "../styles/global.css";
 import { useRouter } from "next/router";
+import api from "../services/api";
 
 export default function MyApp({ Component, pageProps }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const router = useRouter();
+
+  // ✅ Enregistrer le service worker et demander les notifications
+  useEffect(() => {
+    const initServiceWorker = async () => {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        try {
+          // Enregistrer le service worker
+          const registration = await navigator.serviceWorker.register('/sw.js');
+          console.log('✅ Service Worker enregistré:', registration.scope);
+
+          // Demander la permission de notification
+          const permission = await Notification.requestPermission();
+          console.log('📱 Permission notification:', permission);
+
+          if (permission === 'granted') {
+            // S'abonner aux notifications push
+            const token = localStorage.getItem('token');
+            if (token) {
+              const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: 'BPvQSeODcyM1HeCsscthJxdqTVZVZvuRcTz9r89tqJfvbN1AN2S2UaLgxjF8eET__Plbx4b18qUGH-APE3xN92o'
+              });
+              
+              // Envoyer l'abonnement au backend
+              await api.post('/notifications/subscribe', { 
+                subscription: subscription.toJSON() 
+              });
+              
+              console.log('✅ Abonnement push réussi');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Erreur Service Worker:', error);
+        }
+      }
+    };
+
+    initServiceWorker();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');

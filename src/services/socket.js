@@ -24,7 +24,7 @@ class SocketService {
     }
 
     try {
-      // 👇 LIGNE MODIFIÉE - URL de votre backend Hostinger
+      // URL de votre backend Hostinger
       this.socket = io('https://green-alpaca-449310.hostingersite.com', {
         auth: { token },
         transports: ['websocket'],
@@ -90,6 +90,22 @@ class SocketService {
 
     this.socket.on('new-notification', (data) => {
       console.log('📢 Nouvelle notification reçue:', data);
+      
+      // ✅ Afficher une notification système si le site n'est pas au premier plan
+      if (document.visibilityState !== 'visible' && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification(data.title || 'Rencontre Authentique', {
+            body: data.body,
+            icon: '/logo192.png',
+            badge: '/favicon.ico',
+            vibrate: [200, 100, 200],
+            data: { url: data.url }
+          });
+        } catch (notifError) {
+          console.error('❌ Erreur affichage notification:', notifError);
+        }
+      }
+      
       this.triggerCallbacks('new-notification', data);
     });
 

@@ -9,18 +9,18 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import SendIcon from "@mui/icons-material/Send";
-import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
 export default function Profile({ user: propUser, setUser: setPropUser }) {
   const router = useRouter();
   const [user, setUser] = useState(propUser);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [showPhoto, setShowPhoto] = useState(true);
+  const [showPhoto, setShowPhoto] = useState(true); // ✅ Par défaut visible
   const [editedUser, setEditedUser] = useState({});
   const [newPost, setNewPost] = useState("");
   const [posts, setPosts] = useState([]);
@@ -30,6 +30,7 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
   const [success, setSuccess] = useState("");
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [postMessage, setPostMessage] = useState("");
+  const [hasApprovedPost, setHasApprovedPost] = useState(false);
 
   // URL de base dynamique
   const getBaseUrl = () => {
@@ -66,10 +67,14 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
         localStorage.setItem('user', JSON.stringify(profileRes));
         if (setPropUser) setPropUser(profileRes);
         
-        // ✅ CORRECTION: Charger les posts de l'utilisateur avec leur statut
+        // Charger les posts de l'utilisateur
         const postsRes = await api.get(`/posts/user/${profileRes.id}`);
         console.log("Posts chargés:", postsRes);
         setPosts(postsRes || []);
+        
+        // Vérifier si l'utilisateur a déjà un post approuvé
+        const hasApproved = postsRes.some(post => post.isApproved === 1);
+        setHasApprovedPost(hasApproved);
         
       } catch (error) {
         setError(error.message);
@@ -141,19 +146,24 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
     try {
       const response = await api.post('/posts', { content: newPost });
       
-      // ✅ CORRECTION: Ajouter le nouveau post avec le bon statut
-      const newPostWithStatus = {
-        ...response,
-        status: response.isApproved ? 'approved' : 'pending',
-        message: response.isApproved 
-          ? '✅ Publication approuvée' 
-          : '⏳ En attente d\'approbation par l\'administrateur'
-      };
-      
-      setPosts([newPostWithStatus, ...posts]);
+      // Ajouter le nouveau post
+      setPosts([response, ...posts]);
       setNewPost("");
-      setPostMessage("✅ Publication envoyée ! Elle sera visible après approbation de l'administrateur.");
+      
+      // Message différent selon le statut
+      if (response.isApproved === 1) {
+        setPostMessage("✅ Publication publiée immédiatement !");
+      } else {
+        setPostMessage("⏳ Publication envoyée ! En attente d'approbation (première publication)");
+      }
+      
       setTimeout(() => setPostMessage(""), 5000);
+      
+      // Mettre à jour hasApprovedPost si nécessaire
+      if (response.isApproved === 1 && !hasApprovedPost) {
+        setHasApprovedPost(true);
+      }
+      
     } catch (error) {
       setError(error.message);
     }
@@ -163,8 +173,14 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
     if (!confirm("Supprimer cette publication ?")) return;
     try {
       await api.delete(`/posts/${postId}`);
-      setPosts(posts.filter(p => p.id !== postId));
+      const updatedPosts = posts.filter(p => p.id !== postId);
+      setPosts(updatedPosts);
       setSuccess("✅ Publication supprimée !");
+      
+      // Recalculer hasApprovedPost
+      const hasApproved = updatedPosts.some(post => post.isApproved === 1);
+      setHasApprovedPost(hasApproved);
+      
       setTimeout(() => setSuccess(""), 3000);
     } catch (error) {
       setError(error.message);
@@ -325,7 +341,14 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
       </div>
 
       <div className={styles.postSection}>
-        <h3>Publier quelque chose</h3>
+        <h3>
+          Publier quelque chose
+          {hasApprovedPost && (
+            <span className={styles.autoApproveBadge}>
+              <AutoAwesomeIcon /> Publication automatique
+            </span>
+          )}
+        </h3>
         <textarea
           value={newPost}
           onChange={(e) => setNewPost(e.target.value)}
@@ -368,10 +391,13 @@ export default function Profile({ user: propUser, setUser: setPropUser }) {
               {post.isApproved === 0 ? (
                 <div className={styles.pendingStatus}>
                   <HourglassEmptyIcon /> En attente d'approbation
+                  {!hasApprovedPost && posts.filter(p => p.isApproved === 1).length === 0 && (
+                    <span className={styles.firstPostTag}>Première publication</span>
+                  )}
                 </div>
               ) : (
                 <div className={styles.approvedStatus}>
-                  <CheckCircleIcon /> Approuvé et visible
+                  <CheckCircleIcon /> Publié
                 </div>
               )}
             </div>
