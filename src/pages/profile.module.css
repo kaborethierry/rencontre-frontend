@@ -38,6 +38,32 @@
   margin-right: auto;
 }
 
+.infoMessage {
+  background: #e3f2fd;
+  color: #0A1F44;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-left: 4px solid #2196F3;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .profileCard {
   max-width: 1000px;
   margin: 0 auto 40px;
@@ -102,14 +128,8 @@
   margin-top: 5px;
 }
 
-.photoInput {
-  margin-top: 15px;
-  width: 100%;
-}
-
-/* ✅ Masquage fonctionnel - s'active quand showPhoto = false */
 .blur {
-  filter: blur(8px);  /* ← Le flou s'applique quand on veut masquer */
+  filter: blur(8px);
   opacity: 0.7;
   transition: all 0.3s ease;
 }
@@ -176,13 +196,6 @@
   border-color: #FF69B4;
   outline: none;
   box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
-}
-
-.profileInfo input:disabled,
-.profileInfo select:disabled,
-.profileInfo textarea:disabled {
-  background: #f5f5f5;
-  cursor: not-allowed;
 }
 
 .saveBtn {
@@ -267,7 +280,7 @@
   box-shadow: 0 4px 15px rgba(255,105,180,0.3);
 }
 
-.deleteBtn {
+.deleteAccountBtn {
   background: #8B0000;
   color: white;
   padding: 12px 25px;
@@ -283,10 +296,16 @@
   transition: all 0.3s;
 }
 
-.deleteBtn:hover {
+.deleteAccountBtn:hover:not(:disabled) {
   background: #a00000;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(139,0,0,0.3);
+}
+
+.deleteAccountBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .postSection {
@@ -406,61 +425,11 @@
   color: #333;
 }
 
-.postStats {
-  display: flex;
-  gap: 20px;
-  color: #666;
-  font-size: 0.95em;
-  margin-bottom: 15px;
-}
-
 .postActions {
   display: flex;
   gap: 10px;
   margin: 15px 0;
   flex-wrap: wrap;
-}
-
-.likeBtn {
-  background: #fff0f0;
-  color: #d32f2f;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.95em;
-  flex: 1;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.likeBtn:hover {
-  background: #ffcdd2;
-  transform: translateY(-2px);
-}
-
-.editPostBtn {
-  background: #fff3e0;
-  color: #ff9800;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.95em;
-  flex: 1;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.editPostBtn:hover {
-  background: #ffe0b2;
-  transform: translateY(-2px);
 }
 
 .deletePostBtn {
@@ -482,178 +451,6 @@
 .deletePostBtn:hover {
   background: #ffcdd2;
   transform: translateY(-2px);
-}
-
-.editPost {
-  margin: 15px 0;
-}
-
-.editPost textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #FF69B4;
-  border-radius: 8px;
-  font-size: 1em;
-  font-family: inherit;
-  resize: vertical;
-}
-
-.editActions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.saveEditBtn, .cancelEditBtn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.95em;
-  transition: all 0.3s;
-  flex: 1;
-  justify-content: center;
-}
-
-.saveEditBtn {
-  background: #28a745;
-  color: white;
-}
-
-.saveEditBtn:hover {
-  background: #218838;
-  transform: translateY(-2px);
-}
-
-.cancelEditBtn {
-  background: #6c757d;
-  color: white;
-}
-
-.cancelEditBtn:hover {
-  background: #5a6268;
-  transform: translateY(-2px);
-}
-
-.edited {
-  color: #FF69B4;
-  font-size: 0.85em;
-  font-style: italic;
-  margin-left: 5px;
-}
-
-.commentsSection {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 2px solid #f0f0f0;
-}
-
-.commentsSection h4 {
-  color: #FF69B4;
-  margin-bottom: 15px;
-}
-
-.commentItem {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 15px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  position: relative;
-  border-left: 3px solid #FF69B4;
-}
-
-.commentUserPhoto {
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.commentContent {
-  flex: 1;
-}
-
-.commentContent strong {
-  color: #FF69B4;
-  display: block;
-  margin-bottom: 5px;
-}
-
-.commentContent p {
-  margin: 5px 0;
-  color: #333;
-}
-
-.commentContent small {
-  color: #999;
-  font-size: 0.8em;
-}
-
-.deleteCommentBtn {
-  background: none;
-  border: none;
-  color: #c62828;
-  cursor: pointer;
-  padding: 5px;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  border-radius: 50%;
-  transition: all 0.3s;
-}
-
-.deleteCommentBtn:hover {
-  background: #ffebee;
-  transform: scale(1.1);
-}
-
-.addComment {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.addComment input {
-  flex: 1;
-  padding: 10px 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 25px;
-  font-size: 0.95em;
-  transition: all 0.3s;
-}
-
-.addComment input:focus {
-  outline: none;
-  border-color: #FF69B4;
-  box-shadow: 0 0 0 3px rgba(255,105,180,0.1);
-}
-
-.addComment button {
-  background: #FF69B4;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.95em;
-  transition: all 0.3s;
-}
-
-.addComment button:hover:not(:disabled) {
-  background: #ff4da6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255,105,180,0.3);
-}
-
-.addComment button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
 }
 
 .noPosts {
@@ -694,26 +491,6 @@
     flex-direction: column;
   }
 
-  .addComment {
-    flex-direction: column;
-  }
-
-  .addComment button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .commentItem {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .deleteCommentBtn {
-    position: static;
-    align-self: flex-end;
-    margin-top: 5px;
-  }
-
   .editActions {
     flex-direction: column;
   }
@@ -737,225 +514,5 @@
   .postHeader {
     flex-direction: column;
     text-align: center;
-  }
-}
-
-.deleteAccountBtn {
-  background: #8B0000;
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1em;
-  flex: 1;
-  justify-content: center;
-  transition: all 0.3s;
-  opacity: 1;
-}
-
-.deleteAccountBtn:hover:not(:disabled) {
-  background: #a00000;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(139,0,0,0.3);
-}
-
-.deleteAccountBtn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* Styles pour le profil public */
-.messageBtn {
-  background: linear-gradient(135deg, #FF69B4, #FF1493);
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1em;
-  flex: 1;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.messageBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255,105,180,0.3);
-}
-
-.reportBtn {
-  background: #ff4444;
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1em;
-  flex: 1;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.reportBtn:hover:not(:disabled) {
-  background: #cc0000;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255,68,68,0.3);
-}
-
-.postsSection {
-  max-width: 1000px;
-  margin: 40px auto;
-  background: white;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(255,105,180,0.15);
-}
-
-.postsSection h3 {
-  color: #FF69B4;
-  margin-bottom: 20px;
-  font-size: 1.5em;
-}
-
-.error {
-  text-align: center;
-  color: #c62828;
-  padding: 50px;
-  font-size: 1.2em;
-  background: white;
-  border-radius: 15px;
-  max-width: 600px;
-  margin: 40px auto;
-  box-shadow: 0 4px 15px rgba(255,105,180,0.1);
-}
-
-/* Styles pour les statuts des publications */
-.infoMessage {
-  background: #e3f2fd;
-  color: #0A1F44;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-  border-left: 4px solid #2196F3;
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.pendingPost {
-  border-left: 4px solid #FF9800 !important;
-  background: linear-gradient(to right, rgba(255,152,0,0.05), white) !important;
-}
-
-.postStatus {
-  margin: 10px 0;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 0.95em;
-}
-
-.pendingStatus {
-  color: #FF9800;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff3e0;
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-
-.approvedStatus {
-  color: #4CAF50;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #e8f5e9;
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-
-@media (max-width: 768px) {
-  .postStatus {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* Auto approve badge */
-.autoApproveBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  margin-left: 15px;
-  font-weight: normal;
-  animation: pulse 2s infinite;
-}
-
-.autoApproveBadge svg {
-  font-size: 1rem;
-}
-
-.firstPostTag {
-  background: #FF9800;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  margin-left: 10px;
-  font-weight: bold;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-  }
-}
-
-.infoMessage {
-  background: #e3f2fd;
-  color: #0A1F44;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-  border-left: 4px solid #2196F3;
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
-  font-weight: 500;
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
